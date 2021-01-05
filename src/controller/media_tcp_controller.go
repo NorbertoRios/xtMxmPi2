@@ -6,5 +6,8 @@ import (
 )
 
 func HandleTCPPacket(c channel.IChannel, buffer []byte) {
-	fmt.Printf("New packet: %v", buffer)
+	fmt.Printf("New packet: %X", buffer)
+	fmt.Println()
+	fmt.Printf("New packet as text: %s", buffer)
+	fmt.Println()
 }
