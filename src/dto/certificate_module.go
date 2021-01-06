@@ -12,9 +12,9 @@ var validMagicPackageHeader = [...]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 type CertificateModule struct {
 	MODULE    string
 	OPERATION string
-	PARAMETER CertificateParameter
+	PARAMETER *CertificateParameter `json:",omitempty"`
 	SESSION   string
-	RESPONSE  CertificateResponseError
+	RESPONSE  *CertificateResponseError
 }
 
 func (d CertificateModule) HandleRequest(channel channel.IChannel) {
@@ -44,7 +44,7 @@ func certificateCreateValidResponse(session string) CertificateModule {
 		MODULE:    "CERTIFICATE",
 		OPERATION: "CONNECT",
 		SESSION:   session,
-		RESPONSE: CertificateResponseError{
+		RESPONSE: &CertificateResponseError{
 			ERRORCODE:  0,
 			ERRORCAUSE: "",
 			MASKCMD:    57,
