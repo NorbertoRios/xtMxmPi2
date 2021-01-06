@@ -2,7 +2,6 @@ package dto
 
 import (
 	"comm/channel"
-	"controller"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -27,7 +26,7 @@ func (d CertificateModule) HandleRequest(channel channel.IChannel) {
 	}
 }
 
-func (d CertificateModule) ParseDtoFromData(buffer []byte) controller.ModuleHandler {
+func (d CertificateModule) ParseDtoFromData(buffer []byte) interface{} {
 	var wd CertificateModule
 	err := json.Unmarshal(buffer[12:strings.LastIndex(string(buffer), "}")], &wd)
 	if err != nil {
@@ -41,7 +40,6 @@ func certificateCreateValidResponse(session string) CertificateModule {
 	return CertificateModule{
 		MODULE:    "CERTIFICATE",
 		OPERATION: "CONNECT",
-		PARAMETER: nil,
 		SESSION:   session,
 		RESPONSE: CertificateResponseError{
 			ERRORCODE:  0,

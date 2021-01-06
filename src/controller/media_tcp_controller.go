@@ -11,14 +11,14 @@ var ModuleMap map[string]*ModuleHandler
 
 type ModuleHandler interface {
 	HandleRequest(c channel.IChannel)
-	ParseDtoFromData(buffer []byte) ModuleHandler
+	ParseDtoFromData(buffer []byte) interface{}
 }
 
 func HandleTCPPacket(c channel.IChannel, buffer []byte) {
 	printDebugPackageInfo(buffer)
 	moduleName := ParseModuleName(buffer)
 	typeHandler := *ModuleMap[moduleName]
-	typeHandler.ParseDtoFromData(buffer).HandleRequest(c)
+	typeHandler.ParseDtoFromData(buffer).(ModuleHandler).HandleRequest(c)
 }
 
 func printDebugPackageInfo(buffer []byte) {

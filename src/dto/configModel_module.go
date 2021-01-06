@@ -2,7 +2,6 @@ package dto
 
 import (
 	"comm/channel"
-	"controller"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -76,7 +75,7 @@ func (c ConfigModel) HandleRequest(channel channel.IChannel) {
 
 }
 
-func (c ConfigModel) ParseDtoFromData(buffer []byte) controller.ModuleHandler {
+func (c ConfigModel) ParseDtoFromData(buffer []byte) interface{} {
 	var cm ConfigModel
 	err := json.Unmarshal(buffer[12:strings.LastIndex(string(buffer), "}")], &cm)
 	if err != nil {
