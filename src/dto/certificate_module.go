@@ -20,7 +20,9 @@ type CertificateModule struct {
 func (d CertificateModule) HandleRequest(channel channel.IChannel) {
 	response := certificateCreateValidResponse(d.SESSION)
 	responseJ, _ := json.Marshal(response)
-	err := channel.SendBytes(append(validMagicPackageHeader[:], responseJ...))
+	bytes := append(validMagicPackageHeader[:], responseJ...)
+	err := channel.SendBytes(bytes)
+	fmt.Printf("\nsent packet back as text: %s", bytes)
 	if err != nil {
 		fmt.Errorf("HandleRequest %e", err)
 	}
@@ -28,7 +30,8 @@ func (d CertificateModule) HandleRequest(channel channel.IChannel) {
 
 func (d CertificateModule) ParseDtoFromData(buffer []byte) interface{} {
 	var wd CertificateModule
-	err := json.Unmarshal(buffer[12:strings.LastIndex(string(buffer), "}")], &wd)
+	jei := strings.LastIndex(string(buffer), "}")
+	err := json.Unmarshal(buffer[12:jei+1], &wd)
 	if err != nil {
 		fmt.Println(err)
 		return nil

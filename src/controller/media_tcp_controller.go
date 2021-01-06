@@ -31,7 +31,7 @@ func printDebugPackageInfo(buffer []byte) {
 func ParseModuleName(buffer []byte) string {
 	mod := string(buffer[14:20])
 	if mod == "MODULE" {
-		return string(buffer[22:strings.Index(string(buffer[22:40]), "\"")])
+		return string(buffer[23 : strings.IndexByte(string(buffer[23:40]), 0x22)+23])
 	} else {
 		return ""
 	}
