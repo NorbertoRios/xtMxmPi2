@@ -1,11 +1,19 @@
 package dto
 
+import (
+	"comm/channel"
+	"controller"
+	"encoding/json"
+	"fmt"
+	"strings"
+)
+
 type ConfigModel struct {
 	MODULE    string
 	OPERATION string
 	PARAMETER ConfigModelParameter
 	SESSION   string
-	RESPONSE  string
+	RESPONSE  ConfigModuleResponse
 }
 
 type ConfigModelParameter struct {
@@ -62,4 +70,18 @@ type MAINParam struct {
 type ConfigModuleResponse struct {
 	ERRORCAUSE string
 	ERRORCODE  int
+}
+
+func (c ConfigModel) HandleRequest(channel channel.IChannel) {
+
+}
+
+func (c ConfigModel) ParseDtoFromData(buffer []byte) controller.ModuleHandler {
+	var cm ConfigModel
+	err := json.Unmarshal(buffer[12:strings.LastIndex(string(buffer), "}")], &cm)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return cm
 }

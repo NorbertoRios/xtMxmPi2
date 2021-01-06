@@ -1,6 +1,7 @@
 package comm
 
 import (
+	"controller"
 	"fmt"
 	"log"
 	"net"
@@ -43,6 +44,7 @@ func NewTCPServer(host string, port int) *TCPServer {
 	ServerCounters.AddFloat("Transmitted", 0)
 	ServerCounters.AddFloat("Received", 0)
 	server.setOnNewClient(func(c *Client) {})
+	controller.InitModuleMap()
 	return server
 }
 
