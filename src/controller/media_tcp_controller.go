@@ -4,21 +4,26 @@ import (
 	"comm/channel"
 	"dto"
 	"fmt"
+	"reflect"
 	"strings"
 )
 
 var ModuleMap map[string]*ModuleHandler
+var ModuleHeaderMap map[[12]byte]string
 
 type ModuleHandler interface {
-	HandleRequest(c channel.IChannel)
+	HandleRequest(c channel.IChannel, buffer []byte)
 	ParseDtoFromData(buffer []byte) interface{}
 }
 
 func HandleTCPPacket(c channel.IChannel, buffer []byte) {
 	printDebugPackageInfo(buffer)
 	moduleName := ParseModuleName(buffer)
+	if moduleName == "" {
+		moduleName = ParseHeaderBitMaskName(buffer)
+	}
 	typeHandler := *ModuleMap[moduleName]
-	typeHandler.ParseDtoFromData(buffer).(ModuleHandler).HandleRequest(c)
+	typeHandler.ParseDtoFromData(buffer).(ModuleHandler).HandleRequest(c, buffer)
 }
 
 func printDebugPackageInfo(buffer []byte) {
@@ -37,6 +42,16 @@ func ParseModuleName(buffer []byte) string {
 	}
 }
 
+func ParseHeaderBitMaskName(buffer []byte) string {
+	cHeader := buffer[:12]
+	for k, v := range ModuleHeaderMap {
+		if reflect.DeepEqual(cHeader, k[:]) {
+			return v
+		}
+	}
+	return ""
+}
+
 func InitModuleMap() {
 	if ModuleMap == nil {
 		ModuleMap = make(map[string]*ModuleHandler)
@@ -48,5 +63,14 @@ func InitModuleMap() {
 			MODULE: "CONFIGMODEL",
 		}
 		ModuleMap["CONFIGMODEL"] = &cmmh
+
+		var hbm ModuleHandler = &dto.HeartBit{
+			MODULE: "HEARTBIT",
+		}
+		ModuleMap["HEARTBIT"] = &hbm
+	}
+	if ModuleHeaderMap == nil {
+		ModuleHeaderMap = make(map[[12]byte]string)
+		ModuleHeaderMap[dto.HeartBitHeader] = "HEARTBIT"
 	}
 }

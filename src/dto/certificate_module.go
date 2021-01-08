@@ -17,7 +17,7 @@ type CertificateModule struct {
 	RESPONSE  *CertificateResponseError
 }
 
-func (d CertificateModule) HandleRequest(channel channel.IChannel) {
+func (d CertificateModule) HandleRequest(channel channel.IChannel, buffer []byte) {
 	response := certificateCreateValidResponse(d.SESSION)
 	responseJ, _ := json.Marshal(response)
 	bytes := append(validMagicPackageHeader[:], responseJ...)
@@ -35,6 +35,9 @@ func (d CertificateModule) ParseDtoFromData(buffer []byte) interface{} {
 	if err != nil {
 		fmt.Println(err)
 		return nil
+	}
+	if wd.OPERATION == "KEEPALIVE" {
+		return HeartBit{}.ParseDtoFromData(buffer)
 	}
 	return wd
 }

@@ -71,7 +71,7 @@ type ConfigModuleResponse struct {
 	ERRORCODE  int
 }
 
-func (c ConfigModel) HandleRequest(channel channel.IChannel) {
+func (c ConfigModel) HandleRequest(channel channel.IChannel, buffer []byte) {
 
 }
 
