@@ -21,6 +21,9 @@ func HandleTCPPacket(c channel.IChannel, buffer []byte) {
 	moduleName := ParseModuleName(buffer)
 	if moduleName == "" {
 		moduleName = ParseHeaderBitMaskName(buffer)
+		if moduleName == "" {
+			return
+		}
 	}
 	typeHandler := *ModuleMap[moduleName]
 	typeHandler.ParseDtoFromData(buffer).(ModuleHandler).HandleRequest(c, buffer)
