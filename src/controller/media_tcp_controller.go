@@ -25,6 +25,9 @@ func HandleTCPPacket(c channel.IChannel, buffer []byte) {
 			return
 		}
 	}
+	if ModuleMap[moduleName] == nil {
+		return
+	}
 	typeHandler := *ModuleMap[moduleName]
 	typeHandler.ParseDtoFromData(buffer).(ModuleHandler).HandleRequest(c, buffer)
 }
@@ -71,6 +74,10 @@ func InitModuleMap() {
 			MODULE: "HEARTBIT",
 		}
 		ModuleMap["HEARTBIT"] = &hbm
+		var evm ModuleHandler = &dto.Evem{
+			MODULE: "EVEM",
+		}
+		ModuleMap["EVEM"] = &evm
 	}
 	if ModuleHeaderMap == nil {
 		ModuleHeaderMap = make(map[[12]byte]string)
