@@ -11,10 +11,11 @@ import (
 var HeartBitHeader = [...]byte{0x08, 0x16, 0x02, 0x00, 0x00, 0x00, 0x00, 0x7c, 0x52, 0x00, 0x00, 0x00}
 
 type HeartBit struct {
-	MODULE    string
-	OPERATION string
-	SESSION   string
-	RESPONSE  *HeartBitResponseError `json:",omitempty"`
+	GeneralPackageHeader `json:"-"`
+	MODULE               string
+	OPERATION            string
+	SESSION              string
+	RESPONSE             *HeartBitResponseError `json:",omitempty"`
 }
 
 type HeartBitResponseError struct {

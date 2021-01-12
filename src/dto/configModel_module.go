@@ -8,11 +8,12 @@ import (
 )
 
 type ConfigModel struct {
-	MODULE    string
-	OPERATION string
-	PARAMETER ConfigModelParameter
-	SESSION   string
-	RESPONSE  ConfigModuleResponse
+	GeneralPackageHeader `json:"-"`
+	MODULE               string
+	OPERATION            string
+	PARAMETER            ConfigModelParameter
+	SESSION              string
+	RESPONSE             ConfigModuleResponse
 }
 
 type ConfigModelParameter struct {

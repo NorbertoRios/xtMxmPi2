@@ -8,11 +8,12 @@ import (
 )
 
 type Evem struct {
-	MODULE    string
-	OPERATION string
-	PARAMETER *EvemParameter `json:",omitempty"`
-	SESSION   string
-	RESPONSE  *EvemResponse `json:",omitempty"`
+	GeneralPackageHeader `json:"-"`
+	MODULE               string
+	OPERATION            string
+	PARAMETER            *EvemParameter `json:",omitempty"`
+	SESSION              string
+	RESPONSE             *EvemResponse `json:",omitempty"`
 }
 
 type EvemParameter struct {

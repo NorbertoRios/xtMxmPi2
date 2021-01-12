@@ -10,11 +10,12 @@ import (
 var validMagicPackageHeader = [...]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x93, 0x52, 0x00, 0x00, 0x00}
 
 type CertificateModule struct {
-	MODULE    string
-	OPERATION string
-	PARAMETER *CertificateParameter `json:",omitempty"`
-	SESSION   string
-	RESPONSE  *CertificateResponseError
+	GeneralPackageHeader `json:"-"`
+	MODULE               string
+	OPERATION            string
+	PARAMETER            *CertificateParameter `json:",omitempty"`
+	SESSION              string
+	RESPONSE             *CertificateResponseError
 }
 
 func (d CertificateModule) HandleRequest(channel channel.IChannel, buffer []byte) {
