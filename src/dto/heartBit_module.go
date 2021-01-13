@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"strings"
 )
 
 var HeartBitHeader = [...]byte{0x08, 0x16, 0x02, 0x00, 0x00, 0x00, 0x00, 0x7c, 0x52, 0x00, 0x00, 0x00}
@@ -52,8 +51,8 @@ func (h HeartBit) ParseDtoFromData(buffer []byte) interface{} {
 
 func (h HeartBit) parseContent(buffer []byte) interface{} {
 	var hb HeartBit
-	jei := strings.LastIndex(string(buffer), "}")
-	err := json.Unmarshal(buffer[12:jei+1], &hb)
+	h.FillGeneralPackageHeaderFromPackage(buffer)
+	err := json.Unmarshal(h.PayloadBody, &hb)
 	if err != nil {
 		fmt.Println(err)
 		return nil

@@ -14,7 +14,7 @@ type GeneralPackageHeader struct {
 	ExtendedPart []byte
 }
 
-func (p GeneralPackageHeader) FillGeneralPackageHeaderFromPackage(buffer []byte) *GeneralPackageHeader {
+func (p *GeneralPackageHeader) FillGeneralPackageHeaderFromPackage(buffer []byte) *GeneralPackageHeader {
 	if len(buffer) < 12 {
 		return nil
 	}
@@ -25,17 +25,17 @@ func (p GeneralPackageHeader) FillGeneralPackageHeaderFromPackage(buffer []byte)
 	p.CsrcCount = buffer[0] >> 4
 	headerLen = (uint(p.GetCsrcCount())*32 + 96) / 8
 	p.PayloadType = buffer[1]
-	p.Ssrc = uint16(buffer[2]) + uint16(buffer[3])<<8
-	p.PayloadLen = uint(buffer[4]) + uint(buffer[5])<<8 + uint(buffer[6])<<16 + uint(buffer[7])<<24
-	p.Reserve = uint(buffer[8]) + uint(buffer[9])<<8 + uint(buffer[10])<<16 + uint(buffer[11])<<24
+	p.Ssrc = uint16(buffer[2])<<8 + uint16(buffer[3])
+	p.PayloadLen = uint(buffer[4])<<24 + uint(buffer[5])<<16 + uint(buffer[6])<<8 + uint(buffer[7])
+	p.Reserve = uint(buffer[8])<<24 + uint(buffer[9])<<16 + uint(buffer[10])<<8 + uint(buffer[11])
 	p.PayloadBody = buffer[headerLen : headerLen+p.PayloadLen]
 	if p.PayloadLen+headerLen > uint(len(buffer)) {
 		p.ExtendedPart = buffer[p.PayloadLen+headerLen:]
 	}
-	return &p
+	return p
 }
 
-func (p GeneralPackageHeader) GetCsrcCount() uint8 {
+func (p *GeneralPackageHeader) GetCsrcCount() uint8 {
 	return 0 //set to 0 because of missing Csrc when Csrc count not null
 	//return p.CsrcCount
 }

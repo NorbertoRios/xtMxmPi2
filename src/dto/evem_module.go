@@ -4,7 +4,6 @@ import (
 	"comm/channel"
 	"encoding/json"
 	"fmt"
-	"strings"
 )
 
 type Evem struct {
@@ -86,8 +85,8 @@ func (e Evem) HandleRequest(channel channel.IChannel, buffer []byte) {
 
 func (e Evem) ParseDtoFromData(buffer []byte) interface{} {
 	var result Evem
-	jei := strings.LastIndex(string(buffer), "}")
-	err := json.Unmarshal(buffer[12:jei+1], &result)
+	e.FillGeneralPackageHeaderFromPackage(buffer)
+	err := json.Unmarshal(e.PayloadBody, &result)
 	if err != nil {
 		fmt.Println(err)
 		return nil

@@ -4,7 +4,6 @@ import (
 	"comm/channel"
 	"encoding/json"
 	"fmt"
-	"strings"
 )
 
 var validMagicPackageHeader = [...]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x93, 0x52, 0x00, 0x00, 0x00}
@@ -30,9 +29,9 @@ func (d CertificateModule) HandleRequest(channel channel.IChannel, buffer []byte
 }
 
 func (d CertificateModule) ParseDtoFromData(buffer []byte) interface{} {
+	d.FillGeneralPackageHeaderFromPackage(buffer)
 	var wd CertificateModule
-	jei := strings.LastIndex(string(buffer), "}")
-	err := json.Unmarshal(buffer[12:jei+1], &wd)
+	err := json.Unmarshal(d.PayloadBody, &wd)
 	if err != nil {
 		fmt.Println(err)
 		return nil

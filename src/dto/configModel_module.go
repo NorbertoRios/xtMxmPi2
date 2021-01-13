@@ -4,7 +4,6 @@ import (
 	"comm/channel"
 	"encoding/json"
 	"fmt"
-	"strings"
 )
 
 type ConfigModel struct {
@@ -78,7 +77,8 @@ func (c ConfigModel) HandleRequest(channel channel.IChannel, buffer []byte) {
 
 func (c ConfigModel) ParseDtoFromData(buffer []byte) interface{} {
 	var cm ConfigModel
-	err := json.Unmarshal(buffer[12:strings.LastIndex(string(buffer), "}")], &cm)
+	c.FillGeneralPackageHeaderFromPackage(buffer)
+	err := json.Unmarshal(c.PayloadBody, &cm)
 	if err != nil {
 		fmt.Println(err)
 		return nil
