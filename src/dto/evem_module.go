@@ -61,7 +61,7 @@ const (
 	ArmingAlarmAT                    AlarmType = 53
 	PhoneCallAlarm                   AlarmType = 54
 	GPSFaultAlarm                    AlarmType = 55
-	DSMAlarmAT                       AlarmType = 56
+	DSMAlarmAT                       AlarmType = 56 //phone not allowed alarm
 	FireBoxAlarm                     AlarmType = 57
 	DriverFacialRecognitionAlarm     AlarmType = 96
 )
