@@ -1,6 +1,8 @@
 package dto
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type ChannelNumberAlarmParameter struct {
 	Channel     uint `json:"CHANNEL,omitempty"`     // position of bit is considered a channel number starts from 1
@@ -592,6 +594,232 @@ var GBoxASTypeEnum = struct {
 	OpenTheDoorWhenVehicleIsMovingMiddleDoor: 11,
 }
 
-type LicensePlateRecognitionAlarm struct {
+type LicensePlateRecognitionAlarmParameter struct {
 	//CAR[N] string //Identified license plate number,
+}
+
+type speedUnit byte
+
+var speedUnitEnum = struct {
+	KMpH speedUnit
+	MpH  speedUnit
+}{
+	KMpH: 0,
+	MpH:  1,
+}
+
+type SwitchDoorWhenVehicleIsMovingAlarmParameter struct { //3.4.1.5.32
+	ALARMNAME string
+	SER       string //Abbreviation of the name of the alarm
+	DR0       byte   //front door
+	DR1       byte   //door
+	DR2       byte   //back door
+	D         speedUnit
+	V         int // speed/100
+	X         int //speed limit, speed/100
+}
+
+type WirelessSignalAbnormalityAlarmParameter struct {
+	ID byte //0: Communication module 1 ; 1: Communication module 2
+	MS byte //Communication module status 0: module does not exist ; 1: module exists
+	SS byte //SIM card status 0: SIM card does not exist ; 1: SIM card is valid ; 2: SIM card is invalid
+	S  byte // Signal strength, 0 ~ 5 grid number
+}
+
+type ArmingAlarmParameter struct {
+	TH int //Arming alarm time threshold, unit: seconds
+}
+
+type GPSMalfunctionAlarmParameter struct {
+	CT int //Malfunction duration, in seconds
+	//GPS system time when the last valid time,
+	//for example: 20160815144530 means August 15th, 2016 14:45:30
+	HT string
+	HP LocationInformationParameter
+}
+
+type GPSAntennaAlarmParameter struct {
+	S         int //0: normal 1: open circuit 2: short circuit
+	ALARMNAME string
+	SER       string //Abbreviation of the name of the alarm
+}
+
+type LocationStatusType byte
+
+var locationStatusTypeEnum = struct {
+	Valid       LocationStatusType
+	Invalid     LocationStatusType
+	NoGpsModule LocationStatusType
+}{
+	Valid:       0,
+	Invalid:     1,
+	NoGpsModule: 2,
+}
+
+type LocationInformationParameter struct {
+	V LocationStatusType
+	//longitude.
+	//Character string description of float number, 6 bit after decimal point
+	//in the format of dddd.mmmmmm(all the zeros need keep)
+	//dddd Range:-179~179
+	//Mmmmmmmm Range:0~999999
+	//Positive value means east longitude, Negative value means west longitude.
+	//E.g ’-080.092000’ stand for west longitude 80.092.
+	J string
+	//Latitude.
+	//Character string described float number, 6 bit after decimal point
+	//in the format of ddd.mmmmmm (all the zeros need keep).
+	//dddd Range:-89~89
+	//mmmmmm Range:0~999999
+	//Positive value means North latitude.
+	//Negative value means South latitude.
+	//E.g ‘-80.590920’ stand for N 80.590920
+	W string
+	S int // Ground speed. Unit:0.01Km/h
+
+	//Ground course range:0~35999
+	// Unit.0.01 degree offset of the North in the clock wise.
+	C int
+	//14 Bytes
+	//Local time in yyyymmddhhmmss format.
+	//E.g :20120928121212 stand for 12:12:12 at 28 of September 2012..
+	T string
+	H int //altitude by sea level
+}
+
+type DSMAlarmParameter struct {
+	ALARMNAME string
+	SER       string //Abbreviation of the name of the alarm
+	ST        SubAlarmTypeDSM
+	LEV       byte //Alarm level 1. First Level Alarm 2. Second Level Alarm
+	LCH       uint //Alarm linkage channel, Bit0~31 for CH1~CH32, when bit==1 will be valid.
+	//When Lane departure warning was triggered,
+	//0—means left Lane departure;
+	//1—means right lane departure.
+	LDWTYPE byte
+	KW      string //Reserved
+}
+
+type SubAlarmTypeDSM uint
+
+var SubAlarmTypeDSMEnum = struct {
+	FatigueDriving          SubAlarmTypeDSM
+	NoDriver                SubAlarmTypeDSM
+	DriverMakingPhoneCall   SubAlarmTypeDSM
+	DriverSmoking           SubAlarmTypeDSM
+	DriverDistraction       SubAlarmTypeDSM
+	LaneDeviation           SubAlarmTypeDSM
+	FrontCarCollision       SubAlarmTypeDSM
+	PreAlarmForOverSpeed    SubAlarmTypeDSM
+	LicensePlateRecognition SubAlarmTypeDSM
+	FollowDistanceWarning   SubAlarmTypeDSM
+	Yawning                 SubAlarmTypeDSM
+	PedestrianDetection     SubAlarmTypeDSM
+	NoSeatbeltAlarm         SubAlarmTypeDSM
+	FacialRecognitionFailed SubAlarmTypeDSM
+	StopSignDetectionAlarm  SubAlarmTypeDSM
+}{
+	FatigueDriving:          0,
+	NoDriver:                1,
+	DriverMakingPhoneCall:   2,
+	DriverSmoking:           3,
+	DriverDistraction:       4,
+	LaneDeviation:           5,
+	FrontCarCollision:       6,
+	PreAlarmForOverSpeed:    7,
+	LicensePlateRecognition: 8,
+	FollowDistanceWarning:   9,
+	Yawning:                 10,
+	PedestrianDetection:     11,
+	NoSeatbeltAlarm:         16,
+	FacialRecognitionFailed: 17,
+	StopSignDetectionAlarm:  31,
+}
+
+type FireBoxAlarmParameter struct {
+	//Fire Box Alarm Subtype
+	//0-31: Detector 1 - detector 32 alarm
+	//32: fire box short circuit alarm
+	//33: fire box open circuit alarm
+	SNO uint
+	LCH uint                    //The channel number of the linked video, bit represent, bit value is 1, valid when field SNO is 0-31
+	SP  FireBoxDetectorPosition //Detector position, field SNO is valid at 0-31
+	STY FireBoxDetectorType     //Detector type, field SNO is valid at 0-31
+	STE FireBoxDetectorStatus   //Detector status, field SNO is valid at 0-31
+}
+
+type FireBoxDetectorStatus byte
+
+var FireBoxDetectorStatusEnum = struct {
+	Offline   FireBoxDetectorStatus
+	Normal    FireBoxDetectorStatus
+	Failure   FireBoxDetectorStatus
+	Pollution FireBoxDetectorStatus
+	Alarm     FireBoxDetectorStatus
+	Isolated  FireBoxDetectorStatus
+}{
+	Offline:   0,
+	Normal:    1,
+	Failure:   2,
+	Pollution: 3,
+	Alarm:     4,
+	Isolated:  5,
+}
+
+type FireBoxDetectorType byte
+
+var FireBoxDetectorTypeEnum = struct {
+	NotInstalled                 FireBoxDetectorType
+	MixedWithSmokeAndTemperature FireBoxDetectorType
+	HighTemperature              FireBoxDetectorType
+	Flame                        FireBoxDetectorType
+	TemperatureSensitiveCable    FireBoxDetectorType
+	SmokeSense                   FireBoxDetectorType
+	SystemReserved               FireBoxDetectorType
+}{
+	NotInstalled:                 0,
+	MixedWithSmokeAndTemperature: 1,
+	HighTemperature:              2,
+	Flame:                        3,
+	TemperatureSensitiveCable:    4,
+	SmokeSense:                   5,
+	SystemReserved:               6,
+}
+
+type FireBoxDetectorPosition byte
+
+var FireBoxDetectorPositionEnum = struct {
+	None                           FireBoxDetectorPosition
+	TheTopOfTheFristEndDriverRoom  FireBoxDetectorPosition
+	TheTopOfTheSecondEndDriverRoom FireBoxDetectorPosition
+	FristEndForTheCabinetInside    FireBoxDetectorPosition
+	SecondEndForTheCabinetInside   FireBoxDetectorPosition
+	TopOfMechanicalRoom1           FireBoxDetectorPosition
+	TopOfMechanicalRoom2           FireBoxDetectorPosition
+	TopOfMechanicalRoom3           FireBoxDetectorPosition
+	TopOfMechanicalRoom4           FireBoxDetectorPosition
+	CorridorFloorTrunking          FireBoxDetectorPosition
+	TopOfTheElectricRoom           FireBoxDetectorPosition
+	TopOfTheElectricRoom1          FireBoxDetectorPosition
+	TopOfTheElectricRoom2          FireBoxDetectorPosition
+	TheTopOfTheElectricRoom        FireBoxDetectorPosition
+	TheTopOfTheElectricRoom1       FireBoxDetectorPosition
+	TheTopOfTheElectricRoom2       FireBoxDetectorPosition
+}{
+	None:                           0,
+	TheTopOfTheFristEndDriverRoom:  1,
+	TheTopOfTheSecondEndDriverRoom: 2,
+	FristEndForTheCabinetInside:    3,
+	SecondEndForTheCabinetInside:   4,
+	TopOfMechanicalRoom1:           5,
+	TopOfMechanicalRoom2:           6,
+	TopOfMechanicalRoom3:           7,
+	TopOfMechanicalRoom4:           8,
+	CorridorFloorTrunking:          9,
+	TopOfTheElectricRoom:           10,
+	TopOfTheElectricRoom1:          11,
+	TopOfTheElectricRoom2:          12,
+	TheTopOfTheElectricRoom:        13,
+	TheTopOfTheElectricRoom1:       14,
+	TheTopOfTheElectricRoom2:       15,
 }
