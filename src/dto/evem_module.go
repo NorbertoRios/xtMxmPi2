@@ -4,6 +4,7 @@ import (
 	"comm/channel"
 	"encoding/json"
 	"fmt"
+	"reflect"
 )
 
 type Evem struct {
@@ -59,12 +60,55 @@ const (
 	SpeedAlarmAT                     AlarmType = 51
 	WirelessSignalAbnormalAlarmAT    AlarmType = 52
 	ArmingAlarmAT                    AlarmType = 53
-	PhoneCallAlarm                   AlarmType = 54
+	PhoneCallAlarmAT                 AlarmType = 54
 	GPSFaultAlarm                    AlarmType = 55
 	DSMAlarmAT                       AlarmType = 56 //phone not allowed alarm
 	FireBoxAlarm                     AlarmType = 57
 	DriverFacialRecognitionAlarm     AlarmType = 96
 )
+
+var AlarmTypeMap = map[int]reflect.Type{
+	0:  reflect.TypeOf(ChannelNumberAlarmParameter{}),
+	1:  reflect.TypeOf(ChannelNumberAlarmParameter{}),
+	2:  reflect.TypeOf(ChannelNumberAlarmParameter{}),
+	3:  reflect.TypeOf(MemoryAbnormalAlarmParameter{}),
+	4:  reflect.TypeOf(UserDefinedAlarmParameter{}),
+	5:  reflect.TypeOf(SentryInspectionAlarmParameter{}),
+	6:  reflect.TypeOf(ChannelNumberAlarmParameter{}),
+	7:  reflect.TypeOf(EmergencyAlarmParameter{}),
+	8:  reflect.TypeOf(SpeedAlarmParameter{}),
+	9:  reflect.TypeOf(LowVoltageAlarmParameter{}),
+	17: reflect.TypeOf(GeoFenceAlarmParameter{}),
+	18: reflect.TypeOf(AccAlarmParameter{}),
+	19: reflect.TypeOf(PeripheralDroppedAlarmParameter{}),
+	20: reflect.TypeOf(StopAnnouncementAlarmParameter{}),
+	21: reflect.TypeOf(GPSAntennaAlarmParameter{}),
+	22: reflect.TypeOf(DayNightSwitchAlarm{}),
+	32: reflect.TypeOf(SerialAlarmParameter{}),
+	33: reflect.TypeOf(FatigueDrivingAlarmParameter{}),
+	34: reflect.TypeOf(TimeoutParkingAlarmParameter{}),
+	35: reflect.TypeOf(GestureAlarmParameter{}),
+	36: reflect.TypeOf(GreenDrivingAlarmParameter{}),
+	37: reflect.TypeOf(IllegalIgnitionAlarm{}),
+	38: reflect.TypeOf(IllegalShutdownAlarm{}),
+	39: reflect.TypeOf(CustomExternalInputAlarm{}),
+	42: reflect.TypeOf(OilVolumeAlarmParameter{}),
+	43: reflect.TypeOf(BusLaneOccupationAlarmParameter{}),
+	44: reflect.TypeOf(UserDefinedAlarmParameter{}),
+	45: reflect.TypeOf(SpecialCustomerMalfunctionAlarmParameter{}),
+	46: reflect.TypeOf(TemperatureAbnormallyAlarmParameter{}),
+	47: reflect.TypeOf(AbnormalTemperatureChangeAlarmParameter{}),
+	48: reflect.TypeOf(SmokeAlarmParameter{}),
+	49: reflect.TypeOf(GBoxAlarmParameter{}),
+	50: reflect.TypeOf(LicensePlateRecognitionAlarmParameter{}),
+	51: reflect.TypeOf(SpeedAlarmParameter{}),
+	52: reflect.TypeOf(WirelessSignalAbnormalityAlarmParameter{}),
+	53: reflect.TypeOf(ArmingAlarmParameter{}),
+	54: reflect.TypeOf(PhoneCallAlarm{}),
+	55: reflect.TypeOf(GPSMalfunctionAlarmParameter{}),
+	56: reflect.TypeOf(DSMAlarmParameter{}),
+	57: reflect.TypeOf(FireBoxAlarmParameter{}),
+}
 
 const (
 	ImportantEventAI AlarmImportance = iota

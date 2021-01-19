@@ -21,6 +21,12 @@ type MemoryAbnormalAlarmParameter struct {
 	PUSH             byte // 1 need to push, 0 don't
 }
 
+type DayNightSwitchAlarm struct{}
+type ProhibitDrivingAlarm struct{}
+type IllegalIgnitionAlarm struct{}
+type IllegalShutdownAlarm struct{}
+type PhoneCallAlarm struct{}
+
 type use int
 
 var useAlarmEnum = struct {
