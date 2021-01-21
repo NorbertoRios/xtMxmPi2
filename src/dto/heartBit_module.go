@@ -4,10 +4,7 @@ import (
 	"comm/channel"
 	"encoding/json"
 	"fmt"
-	"reflect"
 )
-
-var HeartBitHeader = [12]byte{0x08, 0x16, 0x02, 0x00, 0x00, 0x00, 0x00, 0x7c, 0x52, 0x00, 0x00, 0x00}
 
 type HeartBit struct {
 	GeneralPackageHeader `json:"-"`
@@ -23,7 +20,7 @@ type HeartBitResponseError struct {
 }
 
 func (h HeartBit) HandleRequest(channel channel.IChannel, buffer []byte) {
-	if isBinaryPayload(buffer) {
+	if IsBinaryHeartBit(buffer) {
 		fmt.Println("got keep_alive")
 	} else {
 		responseJ, _ := json.Marshal(createValidHeatBitResponse(h.SESSION))
@@ -37,7 +34,7 @@ func (h HeartBit) HandleRequest(channel channel.IChannel, buffer []byte) {
 }
 
 func (h HeartBit) ParseDtoFromData(buffer []byte) interface{} {
-	if isBinaryPayload(buffer) {
+	if IsBinaryHeartBit(buffer) {
 		return &HeartBit{
 			MODULE:    "CERTIFICATE",
 			OPERATION: "KEEPALIVE",
@@ -72,6 +69,11 @@ func createValidHeatBitResponse(session string) HeartBit {
 	}
 }
 
-func isBinaryPayload(buffer []byte) bool {
-	return reflect.DeepEqual(HeartBitHeader[:], buffer[:12])
+func IsBinaryHeartBit(buffer []byte) bool {
+	gp := (&GeneralPackageHeader{}).FillGeneralPackageHeaderFromPackage(buffer)
+	if gp.PayloadType == 22 && gp.PayloadLen == 124 {
+		return true
+	} else {
+		return false
+	}
 }

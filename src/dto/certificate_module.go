@@ -6,8 +6,6 @@ import (
 	"fmt"
 )
 
-var validMagicPackageHeader = [...]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x93, 0x52, 0x00, 0x00, 0x00}
-
 type CertificateModule struct {
 	GeneralPackageHeader `json:"-"`
 	MODULE               string

@@ -4,12 +4,10 @@ import (
 	"comm/channel"
 	"dto"
 	"fmt"
-	"reflect"
 	"strings"
 )
 
 var ModuleMap map[string]*ModuleHandler
-var ModuleHeaderMap map[[12]byte]string
 
 type ModuleHandler interface {
 	HandleRequest(c channel.IChannel, buffer []byte)
@@ -49,11 +47,8 @@ func ParseModuleName(buffer []byte) string {
 }
 
 func ParseHeaderBitMaskName(buffer []byte) string {
-	cHeader := buffer[:12]
-	for k, v := range ModuleHeaderMap {
-		if reflect.DeepEqual(cHeader, k[:]) {
-			return v
-		}
+	if dto.IsBinaryHeartBit(buffer) {
+		return "HEARTBIT"
 	}
 	return ""
 }
@@ -78,9 +73,5 @@ func InitModuleMap() {
 			MODULE: "EVEM",
 		}
 		ModuleMap["EVEM"] = &evm
-	}
-	if ModuleHeaderMap == nil {
-		ModuleHeaderMap = make(map[[12]byte]string)
-		ModuleHeaderMap[dto.HeartBitHeader] = "HEARTBIT"
 	}
 }
