@@ -27,7 +27,7 @@ func (h HeartBit) HandleRequest(channel channel.IChannel, buffer []byte) {
 		fmt.Println("got keep_alive")
 	} else {
 		responseJ, _ := json.Marshal(createValidHeatBitResponse(h.SESSION))
-		bytes := append(validMagicPackageHeader[:], responseJ...)
+		bytes := append(h.toHeaderBytes(uint(len(responseJ))), responseJ...)
 		err := channel.SendBytes(bytes)
 		fmt.Printf("\nsent packet back as text: %s", bytes)
 		if err != nil {

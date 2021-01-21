@@ -35,7 +35,32 @@ func (p *GeneralPackageHeader) FillGeneralPackageHeaderFromPackage(buffer []byte
 	return p
 }
 
+func (p *GeneralPackageHeader) toHeaderBytes(payloadLen uint) []byte {
+	r := [12]byte{}
+	r[0] = p.V<<6 + bool2int(p.P)<<5 + p.CsrcCount
+	r[1] = p.PayloadType
+	r[2] = 0 //Ssrc
+	r[3] = 0 //Ssrc
+	r[4] = byte(payloadLen >> 24)
+	r[5] = byte(payloadLen >> 16)
+	r[6] = byte(payloadLen >> 8)
+	r[7] = byte(payloadLen)
+	r[8] = 0 //start of reserve
+	r[9] = 0
+	r[10] = 0
+	r[11] = 0
+	return r[:]
+}
+
 func (p *GeneralPackageHeader) GetCsrcCount() uint8 {
 	return 0 //set to 0 because of missing Csrc when Csrc count not null
 	//return p.CsrcCount
+}
+
+func bool2int(a bool) byte {
+	if a {
+		return 1
+	} else {
+		return 0
+	}
 }

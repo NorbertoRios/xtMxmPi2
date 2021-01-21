@@ -4,7 +4,6 @@ import (
 	"comm/channel"
 	"encoding/json"
 	"fmt"
-	"reflect"
 )
 
 type Evem struct {
@@ -21,96 +20,6 @@ type Evem struct {
 type AlarmType int
 type AlarmImportance int
 type Lang int
-
-const (
-	VideoLossAT AlarmType = iota
-	CameraCoveredAT
-	MotionDetectionAT
-	StorageAbnormalAT
-	UserDefinedAT
-	SentriesInspectionAT
-	ViolationDetectionAT
-	EmergencyAT
-	SpeedAT
-	LowVoltageAT
-	InternalUseAT        AlarmType = 16
-	FenceInOutAT         AlarmType = 17
-	AccAT                AlarmType = 18
-	PeripheralsDroppedAT AlarmType = 19
-	StopAnnouncementAT   AlarmType = 20
-	GPSAntennaAT         AlarmType = 21
-	DayNightSwitchAT     AlarmType = 22
-	ProhibitDrivingAT    AlarmType = 23
-	//24-31 reserved
-	SerialAlarmAT                    AlarmType = 32
-	FatigueAT                        AlarmType = 33
-	TimeOutParkingAT                 AlarmType = 34
-	GestureAlarmAT                   AlarmType = 35
-	GreenDrivingAlarmEventAT         AlarmType = 36
-	IllegalIgnitionAT                AlarmType = 37
-	IllegalShutdownAT                AlarmType = 38
-	CustomExternalInputAlarmAT       AlarmType = 39
-	OilAlarmAT                       AlarmType = 42
-	BusLaneOccupationAlarmAT         AlarmType = 43
-	ForgottenAlarmAT                 AlarmType = 44
-	SpecialCustomerFaultAlarmAT      AlarmType = 45
-	TemperatureAbnormalAlarmAT       AlarmType = 46
-	TemperatureChangeAbnormalAlarmAT AlarmType = 47
-	SmokeAlarmAT                     AlarmType = 48
-	GBoxAlarmAT                      AlarmType = 49
-	LicensePlateRecognitionAlarmAT   AlarmType = 50
-	SpeedAlarmAT                     AlarmType = 51
-	WirelessSignalAbnormalAlarmAT    AlarmType = 52
-	ArmingAlarmAT                    AlarmType = 53
-	PhoneCallAlarmAT                 AlarmType = 54
-	GPSFaultAlarm                    AlarmType = 55
-	DSMAlarmAT                       AlarmType = 56 //phone not allowed alarm
-	FireBoxAlarm                     AlarmType = 57
-	DriverFacialRecognitionAlarm     AlarmType = 96
-)
-
-var AlarmTypeMap = map[int]reflect.Type{
-	0:  reflect.TypeOf(ChannelNumberAlarmParameter{}),
-	1:  reflect.TypeOf(ChannelNumberAlarmParameter{}),
-	2:  reflect.TypeOf(ChannelNumberAlarmParameter{}),
-	3:  reflect.TypeOf(MemoryAbnormalAlarmParameter{}),
-	4:  reflect.TypeOf(UserDefinedAlarmParameter{}),
-	5:  reflect.TypeOf(SentryInspectionAlarmParameter{}),
-	6:  reflect.TypeOf(ChannelNumberAlarmParameter{}),
-	7:  reflect.TypeOf(EmergencyAlarmParameter{}),
-	8:  reflect.TypeOf(SpeedAlarmParameter{}),
-	9:  reflect.TypeOf(LowVoltageAlarmParameter{}),
-	17: reflect.TypeOf(GeoFenceAlarmParameter{}),
-	18: reflect.TypeOf(AccAlarmParameter{}),
-	19: reflect.TypeOf(PeripheralDroppedAlarmParameter{}),
-	20: reflect.TypeOf(StopAnnouncementAlarmParameter{}),
-	21: reflect.TypeOf(GPSAntennaAlarmParameter{}),
-	22: reflect.TypeOf(DayNightSwitchAlarm{}),
-	32: reflect.TypeOf(SerialAlarmParameter{}),
-	33: reflect.TypeOf(FatigueDrivingAlarmParameter{}),
-	34: reflect.TypeOf(TimeoutParkingAlarmParameter{}),
-	35: reflect.TypeOf(GestureAlarmParameter{}),
-	36: reflect.TypeOf(GreenDrivingAlarmParameter{}),
-	37: reflect.TypeOf(IllegalIgnitionAlarm{}),
-	38: reflect.TypeOf(IllegalShutdownAlarm{}),
-	39: reflect.TypeOf(CustomExternalInputAlarm{}),
-	42: reflect.TypeOf(OilVolumeAlarmParameter{}),
-	43: reflect.TypeOf(BusLaneOccupationAlarmParameter{}),
-	44: reflect.TypeOf(UserDefinedAlarmParameter{}),
-	45: reflect.TypeOf(SpecialCustomerMalfunctionAlarmParameter{}),
-	46: reflect.TypeOf(TemperatureAbnormallyAlarmParameter{}),
-	47: reflect.TypeOf(AbnormalTemperatureChangeAlarmParameter{}),
-	48: reflect.TypeOf(SmokeAlarmParameter{}),
-	49: reflect.TypeOf(GBoxAlarmParameter{}),
-	50: reflect.TypeOf(LicensePlateRecognitionAlarmParameter{}),
-	51: reflect.TypeOf(SpeedAlarmParameter{}),
-	52: reflect.TypeOf(WirelessSignalAbnormalityAlarmParameter{}),
-	53: reflect.TypeOf(ArmingAlarmParameter{}),
-	54: reflect.TypeOf(PhoneCallAlarm{}),
-	55: reflect.TypeOf(GPSMalfunctionAlarmParameter{}),
-	56: reflect.TypeOf(DSMAlarmParameter{}),
-	57: reflect.TypeOf(FireBoxAlarmParameter{}),
-}
 
 const (
 	ImportantEventAI AlarmImportance = iota
@@ -200,7 +109,8 @@ func (e Evem) createResponse(eP *ActualDSMAlarmParameter) Evem {
 }
 
 func (e Evem) HandleRequest(channel channel.IChannel, buffer []byte) {
-	bytes := append(validMagicPackageHeader[:], e.callAlarmHandler()...)
+	jBytes := e.callAlarmHandler()
+	bytes := append(e.toHeaderBytes(uint(len(jBytes))), jBytes...)
 	err := channel.SendBytes(bytes)
 	fmt.Printf("\nsent packet back as text: %s", bytes)
 	if err != nil {

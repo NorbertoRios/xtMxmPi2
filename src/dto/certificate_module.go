@@ -20,7 +20,7 @@ type CertificateModule struct {
 func (d CertificateModule) HandleRequest(channel channel.IChannel, buffer []byte) {
 	response := certificateCreateValidResponse(d.SESSION)
 	responseJ, _ := json.Marshal(response)
-	bytes := append(validMagicPackageHeader[:], responseJ...)
+	bytes := append(d.toHeaderBytes(uint(len(responseJ))), responseJ...)
 	err := channel.SendBytes(bytes)
 	fmt.Printf("\nsent packet back as text: %s", bytes)
 	if err != nil {
