@@ -137,13 +137,10 @@ const (
 	ChineseTraditional
 )
 
-type EvemParameter struct {
-	AlarmType       AlarmType       `json:"ALARMTYPE,omitempty"`
+type ActualDSMAlarmParameter struct {
+	GeneralParamPayload
 	AlarmImportance AlarmImportance `json:"ALARMAS,omitempty"`
 	AlarmCount      uint16          `json:"ALARMCOUNT,omitempty"`
-	AlarmUID        int             `json:"ALARMUID,omitempty"`
-	CMDNo           int             `json:"CMDNO,omitempty"`
-	CMDType         int             `json:"CMDTYPE,omitempty"`
 	CurrentTime     int             `json:"CURRENTTIME,omitempty"`
 	EventUUID       string          `json:"EVTUUID,omitempty"`
 	Language        int             `json:"L,omitempty"`
@@ -158,7 +155,6 @@ type EvemParameter struct {
 	}
 	TO          int //Indicates reported platform
 	REAL        int // 0: means real-time upload; 1: Indicates replenishing uploading
-	RUN         int //Consistent with the reporting field
 	SECNO       int
 	SP          int
 	ST          int
@@ -176,7 +172,15 @@ type EvemResponse struct {
 	CMDNO      int
 }
 
-func (e Evem) createResponse(eP *EvemParameter) Evem {
+type GeneralParamPayload struct {
+	ALARMUID  int
+	CMDTYPE   int
+	RUN       int
+	ALARMTYPE AlarmType
+	CMDNO     int
+}
+
+func (e Evem) createResponse(eP *ActualDSMAlarmParameter) Evem {
 	return Evem{
 		MODULE:    "EVEM",
 		OPERATION: e.OPERATION,
@@ -186,11 +190,11 @@ func (e Evem) createResponse(eP *EvemParameter) Evem {
 			SERIAL:     0, // 0: Release alarm   1: start the alarm   2：Pre alarm
 			ERRORCAUSE: "SUCCESS",
 			ERRORCODE:  0,
-			ALARMUID:   eP.AlarmUID,
-			CMDTYPE:    eP.CMDType,
+			ALARMUID:   eP.ALARMUID,
+			CMDTYPE:    eP.CMDTYPE,
 			RUN:        eP.RUN,
-			ALARMTYPE:  eP.AlarmType,
-			CMDNO:      eP.CMDNo,
+			ALARMTYPE:  eP.ALARMTYPE,
+			CMDNO:      eP.CMDNO,
 		},
 	}
 }
@@ -335,7 +339,7 @@ func (e *Evem) callAlarmHandler() []byte {
 		json.Unmarshal(e.marshalParam, &p)
 	case 56:
 		//var p DSMAlarmParameter
-		var p EvemParameter
+		var p ActualDSMAlarmParameter
 		json.Unmarshal(e.marshalParam, &p)
 		response := e.createResponse(&p)
 		responseJ, _ := json.Marshal(response)

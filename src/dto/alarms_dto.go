@@ -5,6 +5,7 @@ import (
 )
 
 type ChannelNumberAlarmParameter struct {
+	GeneralParamPayload
 	Channel     uint `json:"CHANNEL,omitempty"`     // position of bit is considered a channel number starts from 1
 	ChannelMask uint `json:"CHANNELMASK,omitempty"` // position of bit is considered a channel alarm valid starts from 1
 	//LCH[N] int
@@ -14,6 +15,7 @@ type ChannelNumberAlarmParameter struct {
 }
 
 type MemoryAbnormalAlarmParameter struct {
+	GeneralParamPayload
 	STORAGETYPE      byte //0 - hard drive 1-U disk 2-SD card
 	STORAGEINDEX     int  //1-32 (logical number of memory)
 	ERRORCODE        int
@@ -21,11 +23,21 @@ type MemoryAbnormalAlarmParameter struct {
 	PUSH             byte // 1 need to push, 0 don't
 }
 
-type DayNightSwitchAlarm struct{}
-type ProhibitDrivingAlarm struct{}
-type IllegalIgnitionAlarm struct{}
-type IllegalShutdownAlarm struct{}
-type PhoneCallAlarm struct{}
+type DayNightSwitchAlarm struct {
+	GeneralParamPayload
+}
+type ProhibitDrivingAlarm struct {
+	GeneralParamPayload
+}
+type IllegalIgnitionAlarm struct {
+	GeneralParamPayload
+}
+type IllegalShutdownAlarm struct {
+	GeneralParamPayload
+}
+type PhoneCallAlarm struct {
+	GeneralParamPayload
+}
 
 type use int
 
@@ -74,6 +86,7 @@ var useAlarmEnum = struct {
 }
 
 type UserDefinedAlarmParameter struct {
+	GeneralParamPayload
 	SNO       byte
 	ALARMNAME string
 	SER       string //Abbreviation of the name of the alarm
@@ -115,11 +128,13 @@ type UserDefinedAlarmParameter struct {
 }
 
 type SentryInspectionAlarmParameter struct {
+	GeneralParamPayload
 	SNO     byte //Custom alarms are numbered by the device to distinguish between multiple custom alarms.
 	CHANNEL byte //linked channel number, starting from 0
 }
 
 type EmergencyAlarmParameter struct {
+	GeneralParamPayload
 	ALARMNAME string
 	SER       string //Abbreviation of the name of the alarm
 	LCH       uint   //The channel number of the linked video, by bit address
@@ -166,6 +181,7 @@ var atEnum = struct {
 }
 
 type SpeedAlarmParameter struct {
+	GeneralParamPayload
 	ATYPE     aType //Alarm category.
 	CSP       int   //unit 1%/km/h
 	MINSP     int   //unit 1%/km/h
@@ -182,11 +198,13 @@ type SpeedAlarmParameter struct {
 }
 
 type LowVoltageAlarmParameter struct {
+	GeneralParamPayload
 	V    int  // 1/100 Volt
 	PUSH uint // 0, 1
 }
 
 type SerialAlarmParameter struct {
+	GeneralParamPayload
 	ALARMNAME string   //Indicates the name of the alarm, 32 bytes
 	SER       string   //Abbreviation of the name of the alarm
 	LCH       uint     //The channel number, by bit address
@@ -225,6 +243,7 @@ var DirectionEnum = struct {
 }
 
 type AccAlarmParameter struct {
+	GeneralParamPayload
 	ALARMNAME string //Indicates the name of the alarm, 32 bytes
 	SER       string //Abbreviation of the name of the alarm
 	LCH       uint   //The channel number, by bit address
@@ -268,6 +287,7 @@ var fenceTypeEnum = struct {
 }
 
 type GeoFenceAlarmParameter struct {
+	GeneralParamPayload
 	E fenceEvent
 
 	//Out of the fence action
@@ -289,12 +309,14 @@ var stopAnnouncementEnum = struct {
 }
 
 type PeripheralDroppedAlarmParameter struct {
+	GeneralParamPayload
 	AN  string // name
 	SER string //Abbreviation of the name of the alarm
 	ID  int    //Peripheral ID
 }
 
 type StopAnnouncementAlarmParameter struct {
+	GeneralParamPayload
 	AN  string           // name
 	SER string           //Abbreviation of the name of the alarm
 	S   stopAnnouncement //Stop announcement alarm subtype
@@ -313,6 +335,7 @@ var FatigueDrivingSubtypeEnum = struct {
 }
 
 type FatigueDrivingAlarmParameter struct {
+	GeneralParamPayload
 	AN string //name
 	AS int    //Fatigue driving subtype
 	C  int    //Current driving duration length in seconds
@@ -320,6 +343,7 @@ type FatigueDrivingAlarmParameter struct {
 }
 
 type TimeoutParkingAlarmParameter struct {
+	GeneralParamPayload
 	AN string //name
 	C  int    //The length of the current parking duration, in seconds
 }
@@ -390,6 +414,7 @@ var GestureDataSRCMap = map[string]reflect.Type{
 }
 
 type GestureAlarmParameter struct {
+	GeneralParamPayload
 	ALARMNAME string
 	SER       string // abbreviation
 	LCH       uint   //The channel number of the linked video, bit representation
@@ -399,6 +424,7 @@ type GestureAlarmParameter struct {
 }
 
 type OBDOriginalStatusParameter struct {
+	GeneralParamPayload
 	REFVALUE    int     //Threshold
 	RPM         int     //Engine RPM
 	COOLANTTEMP int     //Coolant temperature
@@ -413,6 +439,7 @@ type OBDOriginalStatusParameter struct {
 }
 
 type AXISOriginalStatusParameter struct {
+	GeneralParamPayload
 	REFVALUE         int     //Threshold values to trigger an event.
 	DATSRC           string  //Raw data source
 	ACCELX           float32 //Acceleration in X axis. Unit:G.；
@@ -424,6 +451,7 @@ type AXISOriginalStatusParameter struct {
 }
 
 type TyrePressureOriginalStatusParameter struct {
+	GeneralParamPayload
 	REFVALUE string //Threshold values to trigger an event.
 	DATSRC   string //Raw data source
 	TNUM     uint   //The quantity of tire
@@ -431,6 +459,7 @@ type TyrePressureOriginalStatusParameter struct {
 }
 
 type TyreParameter struct {
+	GeneralParamPayload
 	ID    string  //Serial ID
 	NAME  string  //Name
 	PRESS float32 //Pressure (float)
@@ -438,6 +467,7 @@ type TyreParameter struct {
 }
 
 type LoadOriginalStatusParameter struct {
+	GeneralParamPayload
 	REFVALUE  string //Threshold values to trigger an event.
 	DATSRC    string //Raw data source
 	AXLESNUM  int    //Number of axles
@@ -448,14 +478,17 @@ type LoadOriginalStatusParameter struct {
 }
 
 type GreenDrivingAlarmParameter struct {
+	GeneralParamPayload
 	DGSL GreenDrivingDataParameter
 }
 
 type GreenDrivingDataParameter struct {
+	GeneralParamPayload
 	B []interface{}
 }
 
 type CustomExternalInputAlarm struct {
+	GeneralParamPayload
 	SNO       byte //alarm id
 	ALARMNAME string
 	SER       string //Abbreviation of the name of the alarm
@@ -485,6 +518,7 @@ var CustomExternalInputAlarmSubtypeEnum = struct {
 }
 
 type BusLaneOccupationAlarmParameter struct {
+	GeneralParamPayload
 	F         byte //Bus lane occupation detection type 0: to IPC intelligent module active detection.
 	ALARMNAME string
 	SER       string //Abbreviation of the name of the alarm
@@ -494,12 +528,14 @@ type BusLaneOccupationAlarmParameter struct {
 }
 
 type OilVolumeAlarmParameter struct {
+	GeneralParamPayload
 	ALARMNAME string //Indicates the name of the alarm, 32 bytes
 	SER       string //Abbreviation of the name of the alarm
 	LCH       byte   //he channel number of the linked video, bit represent
 }
 
 type SpecialCustomerMalfunctionAlarmParameter struct {
+	GeneralParamPayload
 	AS SpecialCustomerMalfunctionType
 }
 
@@ -534,6 +570,7 @@ var SpecialCustomerMalfunctionTypeEnum = struct {
 }
 
 type TemperatureAbnormallyAlarmParameter struct { //3.4.1.5.27
+	GeneralParamPayload
 	ALARMNAME string
 	S         byte //0 high temperature, 1 low temperature
 	CU        int  //Current temperature
@@ -545,6 +582,7 @@ type TemperatureAbnormallyAlarmParameter struct { //3.4.1.5.27
 }
 
 type AbnormalTemperatureChangeAlarmParameter struct {
+	GeneralParamPayload
 	ALARMNAME string
 	SER       string //Abbreviation of the name of the alarm
 	LCH       byte   //channel number of the linked video, bit represent
@@ -557,6 +595,7 @@ type AbnormalTemperatureChangeAlarmParameter struct {
 }
 
 type SmokeAlarmParameter struct {
+	GeneralParamPayload
 	ALARMNAME string
 	SER       string //Abbreviation of the name of the alarm
 	LCH       byte   //channel number of the linked video, bit represent
@@ -569,6 +608,7 @@ type SmokeAlarmParameter struct {
 }
 
 type GBoxAlarmParameter struct {
+	GeneralParamPayload
 	AS GBoxASType
 }
 
@@ -601,6 +641,7 @@ var GBoxASTypeEnum = struct {
 }
 
 type LicensePlateRecognitionAlarmParameter struct {
+	GeneralParamPayload
 	//CAR[N] string //Identified license plate number,
 }
 
@@ -615,6 +656,7 @@ var speedUnitEnum = struct {
 }
 
 type SwitchDoorWhenVehicleIsMovingAlarmParameter struct { //3.4.1.5.32
+	GeneralParamPayload
 	ALARMNAME string
 	SER       string //Abbreviation of the name of the alarm
 	DR0       byte   //front door
@@ -626,6 +668,7 @@ type SwitchDoorWhenVehicleIsMovingAlarmParameter struct { //3.4.1.5.32
 }
 
 type WirelessSignalAbnormalityAlarmParameter struct {
+	GeneralParamPayload
 	ID byte //0: Communication module 1 ; 1: Communication module 2
 	MS byte //Communication module status 0: module does not exist ; 1: module exists
 	SS byte //SIM card status 0: SIM card does not exist ; 1: SIM card is valid ; 2: SIM card is invalid
@@ -633,10 +676,12 @@ type WirelessSignalAbnormalityAlarmParameter struct {
 }
 
 type ArmingAlarmParameter struct {
+	GeneralParamPayload
 	TH int //Arming alarm time threshold, unit: seconds
 }
 
 type GPSMalfunctionAlarmParameter struct {
+	GeneralParamPayload
 	CT int //Malfunction duration, in seconds
 	//GPS system time when the last valid time,
 	//for example: 20160815144530 means August 15th, 2016 14:45:30
@@ -645,6 +690,7 @@ type GPSMalfunctionAlarmParameter struct {
 }
 
 type GPSAntennaAlarmParameter struct {
+	GeneralParamPayload
 	S         int //0: normal 1: open circuit 2: short circuit
 	ALARMNAME string
 	SER       string //Abbreviation of the name of the alarm
@@ -663,6 +709,7 @@ var locationStatusTypeEnum = struct {
 }
 
 type LocationInformationParameter struct {
+	GeneralParamPayload
 	V LocationStatusType
 	//longitude.
 	//Character string description of float number, 6 bit after decimal point
@@ -694,6 +741,7 @@ type LocationInformationParameter struct {
 }
 
 type DSMAlarmParameter struct {
+	GeneralParamPayload
 	ALARMNAME string
 	SER       string //Abbreviation of the name of the alarm
 	ST        SubAlarmTypeDSM
@@ -743,6 +791,7 @@ var SubAlarmTypeDSMEnum = struct {
 }
 
 type FireBoxAlarmParameter struct {
+	GeneralParamPayload
 	//Fire Box Alarm Subtype
 	//0-31: Detector 1 - detector 32 alarm
 	//32: fire box short circuit alarm
