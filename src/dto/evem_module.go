@@ -11,9 +11,11 @@ type Evem struct {
 	GeneralPackageHeader `json:"-"`
 	MODULE               string
 	OPERATION            string
-	PARAMETER            *EvemParameter `json:",omitempty"`
+	PARAMETER            *interface{} `json:",omitempty"`
 	SESSION              string
 	RESPONSE             *EvemResponse `json:",omitempty"`
+	alarmType            int
+	marshalParam         []byte
 }
 
 type AlarmType int
@@ -174,7 +176,7 @@ type EvemResponse struct {
 	CMDNO      int
 }
 
-func (e Evem) createResponse() Evem {
+func (e Evem) createResponse(eP *EvemParameter) Evem {
 	return Evem{
 		MODULE:    "EVEM",
 		OPERATION: e.OPERATION,
@@ -184,19 +186,17 @@ func (e Evem) createResponse() Evem {
 			SERIAL:     0, // 0: Release alarm   1: start the alarm   2：Pre alarm
 			ERRORCAUSE: "SUCCESS",
 			ERRORCODE:  0,
-			ALARMUID:   e.PARAMETER.AlarmUID,
-			CMDTYPE:    e.PARAMETER.CMDType,
-			RUN:        e.PARAMETER.RUN,
-			ALARMTYPE:  e.PARAMETER.AlarmType,
-			CMDNO:      e.PARAMETER.CMDNo,
+			ALARMUID:   eP.AlarmUID,
+			CMDTYPE:    eP.CMDType,
+			RUN:        eP.RUN,
+			ALARMTYPE:  eP.AlarmType,
+			CMDNO:      eP.CMDNo,
 		},
 	}
 }
 
 func (e Evem) HandleRequest(channel channel.IChannel, buffer []byte) {
-	response := e.createResponse()
-	responseJ, _ := json.Marshal(response)
-	bytes := append(validMagicPackageHeader[:], responseJ...)
+	bytes := append(validMagicPackageHeader[:], e.callAlarmHandler()...)
 	err := channel.SendBytes(bytes)
 	fmt.Printf("\nsent packet back as text: %s", bytes)
 	if err != nil {
@@ -211,135 +211,139 @@ func (e Evem) ParseDtoFromData(buffer []byte) interface{} {
 	json.Unmarshal(e.PayloadBody, &m)
 	pm := m["PARAMETER"].(map[string]interface{})
 	marshalParam, _ := json.Marshal(m["PARAMETER"])
-	e.callAlarmHandler(int(pm["ALARMTYPE"].(float64)), marshalParam)
+	result.alarmType = int(pm["ALARMTYPE"].(float64))
+	result.marshalParam = marshalParam
 	return result
 }
 
-func (e *Evem) callAlarmHandler(alarmType int, jsonParam []byte) *Evem {
-	switch alarmType {
+func (e *Evem) callAlarmHandler() []byte {
+	switch e.alarmType {
 
 	case 0:
 		var p ChannelNumberAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 1:
 		var p ChannelNumberAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 2:
 		var p ChannelNumberAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 3:
 		var p MemoryAbnormalAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 4:
 		var p UserDefinedAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 5:
 		var p SentryInspectionAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 6:
 		var p ChannelNumberAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 7:
 		var p EmergencyAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 8:
 		var p SpeedAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 9:
 		var p LowVoltageAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 17:
 		var p GeoFenceAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 18:
 		var p AccAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 19:
 		var p PeripheralDroppedAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 20:
 		var p StopAnnouncementAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 21:
 		var p GPSAntennaAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 22:
 		var p DayNightSwitchAlarm
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 32:
 		var p SerialAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 33:
 		var p FatigueDrivingAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 34:
 		var p TimeoutParkingAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 35:
 		var p GestureAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 36:
 		var p GreenDrivingAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 37:
 		var p IllegalIgnitionAlarm
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 38:
 		var p IllegalShutdownAlarm
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 39:
 		var p CustomExternalInputAlarm
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 42:
 		var p OilVolumeAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 43:
 		var p BusLaneOccupationAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 44:
 		var p UserDefinedAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 45:
 		var p SpecialCustomerMalfunctionAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 46:
 		var p TemperatureAbnormallyAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 47:
 		var p AbnormalTemperatureChangeAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 48:
 		var p SmokeAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 49:
 		var p GBoxAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 50:
 		var p LicensePlateRecognitionAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 51:
 		var p SpeedAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 52:
 		var p WirelessSignalAbnormalityAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 53:
 		var p ArmingAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 54:
 		var p PhoneCallAlarm
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 55:
 		var p GPSMalfunctionAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 	case 56:
-		var p DSMAlarmParameter
-		json.Unmarshal(jsonParam, &p)
-
+		//var p DSMAlarmParameter
+		var p EvemParameter
+		json.Unmarshal(e.marshalParam, &p)
+		response := e.createResponse(&p)
+		responseJ, _ := json.Marshal(response)
+		return responseJ
 	case 57:
 		var p FireBoxAlarmParameter
-		json.Unmarshal(jsonParam, &p)
+		json.Unmarshal(e.marshalParam, &p)
 
 	}
-	return e
+	return []byte{}
 }
