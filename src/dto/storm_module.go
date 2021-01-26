@@ -43,9 +43,31 @@ func OperationGetCalendarRequest(c channel.IChannel, qMonth string, session stri
 }
 
 func (s Storm) HandleRequest(c channel.IChannel, buffer []byte) {
-	panic("implement me")
+	var m map[string]interface{}
+	json.Unmarshal(s.PayloadBody, &m)
+	rm := m["RESPONSE"].(map[string]interface{})
+	switch m["OPERATION"] {
+	case "GETCALENDAR":
+		marshal, _ := json.Marshal(rm)
+		s.OperationGetCalendarResponse(marshal)
+	}
 }
 
 func (s Storm) ParseDtoFromData(buffer []byte) interface{} {
-	panic("implement me")
+	s.FillGeneralPackageHeaderFromPackage(buffer)
+	return s
+}
+
+func (s Storm) OperationGetCalendarResponse(payload []byte) {
+	var res *GetCalendarResponse
+	json.Unmarshal(payload, res)
+}
+
+type GetCalendarResponse struct {
+	CALENDER   []string
+	CHANNEL    int
+	CHCALENDER []map[string]interface{}
+	COUNT      int
+	ERRORCAUSE string
+	ERRORCODE  int
 }

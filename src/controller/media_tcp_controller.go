@@ -73,5 +73,9 @@ func InitModuleMap() {
 			MODULE: "EVEM",
 		}
 		ModuleMap["EVEM"] = &evm
+		var storm ModuleHandler = &dto.Storm{
+			MODULE: "STORM",
+		}
+		ModuleMap["STORM"] = &storm
 	}
 }
