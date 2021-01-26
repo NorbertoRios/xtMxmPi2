@@ -71,3 +71,35 @@ type GetCalendarResponse struct {
 	ERRORCAUSE string
 	ERRORCODE  int
 }
+
+func OperationQueryFileListRequest(c channel.IChannel, session string, startTime string, endTime string, chMask int) {
+	s := &Storm{
+		GeneralPackageHeader: GeneralPackageHeader{},
+		MODULE:               "STORM",
+		OPERATION:            "QUERYFILELIST",
+		SESSION:              session,
+		RESPONSE:             nil,
+	}
+	var qfl interface{} = &QueryFileListRequestParameter{
+		SERIAL:     95255,
+		STARTTIME:  startTime,
+		CHANNEL:    chMask,
+		ENDTIME:    endTime,
+		STREAMTYPE: 1,
+		FILETYPE:   65535,
+		RFSTORAGE:  0,
+	}
+	s.PARAMETER = &qfl
+	marshal, _ := json.Marshal(s)
+	c.SendBytes(append(s.GeneralPackageHeader.toHeaderBytes(uint(len(marshal))), marshal...))
+}
+
+type QueryFileListRequestParameter struct {
+	SERIAL     int
+	STARTTIME  string
+	CHANNEL    int
+	ENDTIME    string
+	STREAMTYPE int
+	FILETYPE   int
+	RFSTORAGE  int
+}
