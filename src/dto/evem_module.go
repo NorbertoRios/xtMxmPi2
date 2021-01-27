@@ -82,7 +82,7 @@ type EvemResponse struct {
 }
 
 type GeneralParamPayload struct {
-	ALARMUID  int
+	ALARMUID  int //Important distinctive counter, +1 for each new alarm, unique by alarm
 	CMDTYPE   int
 	RUN       int
 	ALARMTYPE AlarmType
