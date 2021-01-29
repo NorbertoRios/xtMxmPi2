@@ -28,8 +28,10 @@ func (p *GeneralPackageHeader) FillGeneralPackageHeaderFromPackage(buffer []byte
 	p.Ssrc = uint16(buffer[2])<<8 + uint16(buffer[3])
 	p.PayloadLen = uint(buffer[4])<<24 + uint(buffer[5])<<16 + uint(buffer[6])<<8 + uint(buffer[7])
 	p.Reserve = uint(buffer[8])<<24 + uint(buffer[9])<<16 + uint(buffer[10])<<8 + uint(buffer[11])
-	p.PayloadBody = buffer[headerLen : headerLen+p.PayloadLen]
-	if p.PayloadLen+headerLen > uint(len(buffer)) {
+	if int(p.PayloadLen+headerLen) > len(buffer) {
+		// next package contains same json
+	} else {
+		p.PayloadBody = buffer[headerLen : headerLen+p.PayloadLen]
 		p.ExtendedPart = buffer[p.PayloadLen+headerLen:]
 	}
 	return p

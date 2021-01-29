@@ -69,6 +69,7 @@ func (c *Client) RemotePort() int {
 //Listen client data from channel
 func (c *Client) Listen() {
 	buffer := make([]byte, 4096)
+	tso := TSOBuffer{}
 	for {
 		count, err := c.Connection.Read(buffer)
 		if err != nil {
@@ -78,8 +79,34 @@ func (c *Client) Listen() {
 		c.LastActivityTs = time.Now().UTC()
 		c.Received = c.Received + int64(count)
 		ServerCounters.AddFloat("Received", float64(count))
-		controller.HandleTCPPacket(c, buffer[:count])
+		tb := buffer[:count]
+		if tso.segmentationInProgress {
+			if tso.addSegment(tb) {
+				if tso.isBufferReady() {
+					fmt.Println("buffer is ready to release TSO")
+					justPrint(tb)
+					controller.HandleTCPPacket(c, tb)
+					tso.resetBuffer()
+				}
+			} else {
+				controller.HandleTCPPacket(c, tb)
+			}
+		} else if IsSegmented(tb) {
+			fmt.Println("SEGMENTATION FOUND IN PACKAGE :")
+			justPrint(tb)
+			tso.initBuffer(tb)
+		} else {
+			controller.HandleTCPPacket(c, tb)
+		}
+
 	}
+}
+
+func justPrint(tb []byte) {
+	fmt.Printf("New packet: %X", tb)
+	fmt.Println()
+	fmt.Printf("New packet as text: %s", tb)
+	fmt.Println()
 }
 
 //LastActivity indicates last device activity
