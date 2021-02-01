@@ -1,5 +1,7 @@
 package dto
 
+import "fmt"
+
 type GeneralPackageHeader struct {
 	V            uint8  // 1,2 bits
 	P            bool   // 3 bit
@@ -35,6 +37,17 @@ func (p *GeneralPackageHeader) FillGeneralPackageHeaderFromPackage(buffer []byte
 		p.ExtendedPart = buffer[p.PayloadLen+headerLen:]
 	}
 	return p
+}
+
+func ContainsAdditionalTCPSegment(buffer []byte) []byte {
+	fmt.Printf("New tcp segment: %s", buffer)
+	payloadLen := uint(buffer[4])<<24 + uint(buffer[5])<<16 + uint(buffer[6])<<8 + uint(buffer[7])
+	if int(payloadLen+12) < len(buffer) {
+		ovBuffer := buffer[payloadLen+12:]
+		return ovBuffer
+	} else {
+		return nil
+	}
 }
 
 func (p *GeneralPackageHeader) toHeaderBytes(payloadLen uint) []byte {

@@ -2,6 +2,7 @@ package comm
 
 import (
 	"controller"
+	"dto"
 	"fmt"
 	"net"
 	"time"
@@ -69,7 +70,7 @@ func (c *Client) RemotePort() int {
 //Listen client data from channel
 func (c *Client) Listen() {
 	buffer := make([]byte, 4096)
-	tso := TSOBuffer{}
+	tso := &TSOBuffer{}
 	for {
 		count, err := c.Connection.Read(buffer)
 		if err != nil {
@@ -80,25 +81,34 @@ func (c *Client) Listen() {
 		c.Received = c.Received + int64(count)
 		ServerCounters.AddFloat("Received", float64(count))
 		tb := buffer[:count]
-		if tso.segmentationInProgress {
-			if tso.addSegment(tb) {
-				if tso.isBufferReady() {
-					fmt.Println("buffer is ready to release TSO")
-					justPrint(tb)
-					controller.HandleTCPPacket(c, tb)
-					tso.resetBuffer()
-				}
-			} else {
-				controller.HandleTCPPacket(c, tb)
-			}
-		} else if IsSegmented(tb) {
-			fmt.Println("SEGMENTATION FOUND IN PACKAGE :")
-			justPrint(tb)
-			tso.initBuffer(tb)
-		} else {
-			controller.HandleTCPPacket(c, tb)
-		}
+		justPrint(tb)
+		handleTCPWithTSO(tso, tb, c)
+	}
+}
 
+func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) {
+	if tso.segmentationInProgress {
+		fmt.Println("SEG IN PROGRESS")
+		if added, overflow := tso.addSegment(buffer); added {
+			if tso.isBufferReady() {
+				fmt.Println("buffer is ready to release TSO")
+				controller.HandleTCPPacket(c, buffer)
+				tso.resetBuffer()
+			}
+			if overflow != nil && len(overflow) > 0 {
+				handleTCPWithTSO(tso, overflow, c)
+			}
+		} else {
+			controller.HandleTCPPacket(c, buffer)
+		}
+	} else if IsSegmented(buffer) {
+		fmt.Println("SEGMENTATION FOUND IN PACKAGE :")
+		fmt.Printf(" %s", buffer)
+		tso.initBuffer(buffer)
+	} else if segment := dto.ContainsAdditionalTCPSegment(buffer); segment != nil { //if merged
+		handleTCPWithTSO(tso, segment, c)
+	} else {
+		controller.HandleTCPPacket(c, buffer)
 	}
 }
 
