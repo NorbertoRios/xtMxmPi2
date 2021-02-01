@@ -82,11 +82,14 @@ func (c *Client) Listen() {
 		ServerCounters.AddFloat("Received", float64(count))
 		tb := buffer[:count]
 		justPrint(tb)
-		handleTCPWithTSO(tso, tb, c)
+		segmentBuffer := handleTCPWithTSO(tso, tb, c)
+		for segmentBuffer != nil {
+			segmentBuffer = handleTCPWithTSO(tso, segmentBuffer, c)
+		}
 	}
 }
 
-func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) {
+func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) []byte {
 	if tso.segmentationInProgress {
 		fmt.Println("SEG IN PROGRESS")
 		if added, overflow := tso.addSegment(buffer); added {
@@ -96,7 +99,7 @@ func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) {
 				tso.resetBuffer()
 			}
 			if overflow != nil && len(overflow) > 0 {
-				handleTCPWithTSO(tso, overflow, c)
+				return overflow
 			}
 		} else {
 			controller.HandleTCPPacket(c, buffer)
@@ -106,10 +109,11 @@ func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) {
 		fmt.Printf(" %s", buffer)
 		tso.initBuffer(buffer)
 	} else if segment := dto.ContainsAdditionalTCPSegment(buffer); segment != nil { //if merged
-		handleTCPWithTSO(tso, segment, c)
+		return segment
 	} else {
 		controller.HandleTCPPacket(c, buffer)
 	}
+	return nil
 }
 
 func justPrint(tb []byte) {

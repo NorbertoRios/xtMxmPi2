@@ -45,20 +45,18 @@ func (b *TSOBuffer) addSegment(segment []byte) (bool, []byte) {
 			b.buffer = append(b.buffer, segment...)
 			b.currentPayloadLen += len(segment)
 			b.bytesNeeded = int(b.expectedPayloadLen) - b.currentPayloadLen
-			//if b.bytesNeeded < len(segment) {
-			//	b.resetBuffer()
-			//	overflowBuffer = segment[b.bytesNeeded-1:]
-			//	return false
-			//}
 			return true, nil
 		} else {
 			b.buffer = append(b.buffer, segment[:b.bytesNeeded]...)
 			b.currentPayloadLen += b.bytesNeeded
 			b.bytesNeeded = int(b.expectedPayloadLen) - b.currentPayloadLen
-
-			overflowBuffer := segment[b.bytesNeeded-1:]
+			if b.bytesNeeded >= 1 {
+				overflowBuffer := segment[b.bytesNeeded-1:]
+				b.resetBuffer()
+				return true, overflowBuffer
+			}
 			b.resetBuffer()
-			return true, overflowBuffer
+			return true, nil
 		}
 	}
 	return false, nil
