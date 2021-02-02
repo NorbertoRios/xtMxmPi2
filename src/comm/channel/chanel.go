@@ -16,4 +16,6 @@ type IChannel interface {
 	LastActivity() time.Time
 	ReceivedBytes() int64
 	TransmittedBytes() int64
+	GetPageBuffer() *interface{}
+	SetPageBuffer(*interface{})
 }

@@ -15,6 +15,7 @@ type Client struct {
 	LastActivityTs time.Time
 	Received       int64
 	Transmitted    int64
+	PageBuffer     *interface{}
 }
 
 // Send text message to client
@@ -126,4 +127,12 @@ func justPrint(tb []byte) {
 //LastActivity indicates last device activity
 func (c *Client) LastActivity() time.Time {
 	return c.LastActivityTs
+}
+
+func (c *Client) GetPageBuffer() *interface{} {
+	return c.PageBuffer
+}
+
+func (c *Client) SetPageBuffer(buffer *interface{}) {
+	c.PageBuffer = buffer
 }

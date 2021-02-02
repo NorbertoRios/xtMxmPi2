@@ -52,7 +52,7 @@ func (s Storm) HandleRequest(c channel.IChannel, buffer []byte) {
 		s.OperationGetCalendarResponse(marshal)
 	case "QUERYFILELIST":
 		marshal, _ := json.Marshal(rm)
-		s.OperationQueryFileListResponse(marshal)
+		s.OperationQueryFileListResponse(marshal, c)
 	}
 }
 
@@ -66,9 +66,48 @@ func (s Storm) OperationGetCalendarResponse(payload []byte) {
 	json.Unmarshal(payload, res)
 }
 
-func (s Storm) OperationQueryFileListResponse(payload []byte) {
+func (s Storm) OperationQueryFileListResponse(payload []byte, c channel.IChannel) {
 	var res *QueryFileListResponse
-	json.Unmarshal(payload, res)
+	err := json.Unmarshal(payload, res)
+	if err == nil && res != nil && res.LASTRECORD == 0 {
+		if res.SENDTIME == 1 {
+			i := interface{}(res)
+			c.SetPageBuffer(&i)
+		}
+		buffer := (*c.GetPageBuffer()).(QueryFileListResponse)
+		if res.AT != nil {
+			buffer.AT = append(buffer.AT, res.AT...)
+		}
+		if res.FILETYPE != nil {
+			buffer.FILETYPE = append(buffer.FILETYPE, res.FILETYPE...)
+		}
+		if res.LOCK != nil {
+			buffer.LOCK = append(buffer.LOCK, res.LOCK...)
+		}
+		if res.RECORD != nil {
+			buffer.RECORD = append(buffer.RECORD, res.RECORD...)
+		}
+		if res.RECORDCHANNEL != nil {
+			buffer.RECORDCHANNEL = append(buffer.RECORDCHANNEL, res.RECORDCHANNEL...)
+		}
+		if res.RECORDID != nil {
+			buffer.RECORDID = append(buffer.RECORDID, res.RECORDID...)
+		}
+		if res.RECORDSIZE != nil {
+			buffer.RECORDSIZE = append(buffer.RECORDSIZE, res.RECORDSIZE...)
+		}
+		if res.STAMPID != nil {
+			buffer.STAMPID = append(buffer.STAMPID, res.STAMPID...)
+		}
+		if res.STREAMTYPE != nil {
+			buffer.STREAMTYPE = append(buffer.STREAMTYPE, res.STREAMTYPE...)
+		}
+		if res.SENDFILECOUNT > 0 {
+			buffer.SENDFILECOUNT += res.SENDFILECOUNT
+		}
+	} else {
+		c.GetPageBuffer()
+	}
 }
 
 type GetCalendarResponse struct {
