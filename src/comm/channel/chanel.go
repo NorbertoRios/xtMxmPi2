@@ -1,6 +1,7 @@
 package channel
 
 import (
+	"interfaces"
 	"time"
 )
 
@@ -18,4 +19,6 @@ type IChannel interface {
 	TransmittedBytes() int64
 	GetPageBuffer() *interface{}
 	SetPageBuffer(*interface{})
+	GetDevice() *interfaces.Device
+	SetDevice(*interfaces.Device)
 }

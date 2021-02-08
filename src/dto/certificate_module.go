@@ -2,8 +2,10 @@ package dto
 
 import (
 	"comm/channel"
+	"controller"
 	"encoding/json"
 	"fmt"
+	"github.com/Workiva/go-datastructures/queue"
 )
 
 type CertificateModule struct {
@@ -38,6 +40,16 @@ func (d CertificateModule) ParseDtoFromData(buffer []byte) interface{} {
 		return HeartBit{}.ParseDtoFromData(buffer)
 	}
 	return wd
+}
+
+func (d CertificateModule) checkDeviceIdentity(channel channel.IChannel, deviceId string) {
+	if channel.GetDevice() == nil {
+		store, loaded := controller.DevicesQHolder.LoadOrStore(deviceId, queue.New(64))
+		if loaded {
+			q := store.(queue.Queue)
+			q.Dispose()
+		}
+	}
 }
 
 func certificateCreateValidResponse(session string) CertificateModule {

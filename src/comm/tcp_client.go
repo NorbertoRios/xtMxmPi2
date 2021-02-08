@@ -4,6 +4,7 @@ import (
 	"controller"
 	"dto"
 	"fmt"
+	"interfaces"
 	"net"
 	"time"
 )
@@ -16,6 +17,7 @@ type Client struct {
 	Received       int64
 	Transmitted    int64
 	PageBuffer     *interface{}
+	Device         *interfaces.Device
 }
 
 // Send text message to client
@@ -135,4 +137,12 @@ func (c *Client) GetPageBuffer() *interface{} {
 
 func (c *Client) SetPageBuffer(buffer *interface{}) {
 	c.PageBuffer = buffer
+}
+
+func (c *Client) GetDevice() *interfaces.Device {
+	return c.Device
+}
+
+func (c *Client) SetDevice(device *interfaces.Device) {
+	c.Device = device
 }
