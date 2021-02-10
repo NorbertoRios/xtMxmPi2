@@ -14,4 +14,6 @@ type Task interface {
 	GetObservers() []Observer
 	Process()
 	IsReady() bool
+	GetType() interface{}
+	ProcessResponse(interface{})
 }

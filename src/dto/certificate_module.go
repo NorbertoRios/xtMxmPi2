@@ -2,10 +2,11 @@ package dto
 
 import (
 	"comm/channel"
-	"controller"
+	"container/list"
 	"encoding/json"
 	"fmt"
-	"github.com/Workiva/go-datastructures/queue"
+	"interfaces"
+	"reflect"
 )
 
 type CertificateModule struct {
@@ -18,6 +19,11 @@ type CertificateModule struct {
 }
 
 func (d CertificateModule) HandleRequest(channel channel.IChannel, buffer []byte) {
+	d.checkDeviceIdentity(channel, d.PARAMETER.DSNO)
+	task := GetFirstByDeviceAndResponseType(channel.GetDevice(), CertificateModule{})
+	if task != nil {
+		task.ProcessResponse(d)
+	}
 	response := certificateCreateValidResponse(d.SESSION)
 	responseJ, _ := json.Marshal(response)
 	bytes := append(d.toHeaderBytes(uint(len(responseJ))), responseJ...)
@@ -44,12 +50,43 @@ func (d CertificateModule) ParseDtoFromData(buffer []byte) interface{} {
 
 func (d CertificateModule) checkDeviceIdentity(channel channel.IChannel, deviceId string) {
 	if channel.GetDevice() == nil {
-		store, loaded := controller.DevicesQHolder.LoadOrStore(deviceId, queue.New(64))
+		var id interfaces.Device = CameraDevice{Id: deviceId}
+		_, loaded := DevicesQHolder.LoadOrStore(id, QueueHolder{Q: list.New()})
 		if loaded {
-			q := store.(queue.Queue)
-			q.Dispose()
+			channel.SetDevice(&id)
+			//var q = store.(QueueHolder).Q
+			fmt.Printf("existing device identity: %v", deviceId)
+		} else {
+			fmt.Printf("new device identity: %v", deviceId)
 		}
 	}
+}
+
+func GetFirstByDeviceAndResponseType(device *interfaces.Device, rType interface{}) interfaces.Task {
+	if device == nil {
+		return nil
+	}
+	value, ok := DevicesQHolder.Load(*device)
+	if ok {
+		var l = value.(QueueHolder).Q
+		front := l.Front()
+		for n := front; n.Value != nil; {
+			task := n.Value.(interfaces.Task)
+			typeV := task.GetType()
+			if IsInstanceOf(typeV, rType) {
+				return task
+			}
+			if n.Next() == nil {
+				break
+			}
+			n = n.Next()
+		}
+	}
+	return nil
+}
+
+func IsInstanceOf(objectPtr, typePtr interface{}) bool {
+	return reflect.TypeOf(objectPtr) == reflect.TypeOf(typePtr)
 }
 
 func certificateCreateValidResponse(session string) CertificateModule {

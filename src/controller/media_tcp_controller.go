@@ -9,7 +9,6 @@ import (
 )
 
 var ModuleMap map[string]*ModuleHandler
-var DevicesQHolder *sync.Map
 
 type ModuleHandler interface {
 	HandleRequest(c channel.IChannel, buffer []byte)
@@ -80,5 +79,5 @@ func InitModuleMap() {
 		}
 		ModuleMap["STORM"] = &storm
 	}
-	DevicesQHolder = new(sync.Map)
+	dto.DevicesQHolder = new(sync.Map)
 }
