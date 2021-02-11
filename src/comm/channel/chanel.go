@@ -21,4 +21,6 @@ type IChannel interface {
 	SetPageBuffer(*interface{})
 	GetDevice() *interfaces.Device
 	SetDevice(*interfaces.Device)
+	GetCurrentSession() string
+	SetCurrentSession(s string)
 }

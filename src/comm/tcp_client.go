@@ -18,6 +18,7 @@ type Client struct {
 	Transmitted    int64
 	PageBuffer     *interface{}
 	Device         *interfaces.Device
+	Session        string
 }
 
 // Send text message to client
@@ -145,4 +146,12 @@ func (c *Client) GetDevice() *interfaces.Device {
 
 func (c *Client) SetDevice(device *interfaces.Device) {
 	c.Device = device
+}
+
+func (c *Client) GetCurrentSession() string {
+	return c.Session
+}
+
+func (c *Client) SetCurrentSession(s string) {
+	c.Session = s
 }

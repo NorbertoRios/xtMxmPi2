@@ -1,0 +1,114 @@
+package dto
+
+import (
+	"comm/channel"
+	"config"
+	"encoding/json"
+	"math/rand"
+	"strconv"
+)
+
+type MediaStreamModel struct {
+	GeneralPackageHeader `json:"-"`
+	MODULE               string
+	OPERATION            string
+	PARAMETER            interface{} //MEDIATASKSTART CREATESTREAM REQUESTSTREAM CONTROLSTREAM MEDIAREGISTEFAILACK MEDIATASKSTOP
+	SESSION              string
+	RESPONSE             interface{} `json:",omitempty"`
+}
+
+func (m MediaStreamModel) HandleRequest(c channel.IChannel, buffer []byte) {
+	switch m.OPERATION {
+	case "REQUESTDOWNLOADVIDEO":
+		m.handleRequestDownloadVideoResponse(c, buffer)
+	case "MEDIATASKSTART":
+		m.handleMediaTaskStartResponse(c, buffer)
+	}
+}
+
+func (m MediaStreamModel) ParseDtoFromData(buffer []byte) interface{} {
+	var result MediaStreamModel
+	m.FillGeneralPackageHeaderFromPackage(buffer)
+	json.Unmarshal(m.PayloadBody, &result)
+	marshalParam, _ := json.Marshal(result.PARAMETER)
+	switch m.OPERATION {
+	case "REQUESTDOWNLOADVIDEO":
+		var msr *MediaStreamModelRequestDownloadVideoResponse
+		json.Unmarshal(marshalParam, msr)
+		result.PARAMETER = &msr
+	case "MEDIATASKSTART":
+		var msr *MediaStreamModelMediaTaskStartResponseParameter
+		json.Unmarshal(marshalParam, msr)
+		result.PARAMETER = &msr
+	}
+	return result
+}
+
+func (m MediaStreamModel) handleRequestDownloadVideoResponse(c channel.IChannel, buffer []byte) {
+
+}
+func (m MediaStreamModel) handleMediaTaskStartResponse(c channel.IChannel, buffer []byte) {
+
+}
+
+func RequestFile(c channel.IChannel, streamName string, streamType int, recordId string, channel int, startTime string, endTime string) {
+	m := &MediaStreamModel{
+		GeneralPackageHeader: GeneralPackageHeader{},
+		MODULE:               "MEDIASTREAMMODEL",
+		OPERATION:            "REQUESTDOWNLOADVIDEO",
+		PARAMETER: MediaStreamModelRequestDownloadVideoParameter{
+			PT:         3,
+			SSRC:       128,
+			STREAMNAME: streamName,
+			STREAMTYPE: streamType,
+			RECORDID:   recordId,
+			CHANNEL:    channel,
+			STARTTIME:  startTime,
+			ENDTIME:    endTime,
+			OFFSETFLAG: 1,
+			OFFSET:     0,
+			IPANDPORT:  config.VideoServerWANIP + ":" + strconv.Itoa(config.VideoServerPort),
+			SERIAL:     rand.Intn(0xffff),
+		},
+		SESSION:  c.GetCurrentSession(),
+		RESPONSE: nil,
+	}
+	header := GeneralPackageHeader{}
+	marshal, _ := json.Marshal(m)
+	headerBytes := header.toHeaderBytes(uint(len(marshal)))
+	c.SendBytes(append(headerBytes, marshal...))
+}
+
+//"OPERATION": "REQUESTDOWNLOADVIDEO"  ACK
+type MediaStreamModelRequestDownloadVideoResponse struct {
+	ERRORCAUSE   string
+	ERRORCODE    int
+	FILESIZE     int
+	LEFTFILESIZE int
+	SERIAL       int
+	STREAMNAME   string
+}
+
+type MediaStreamModelRequestDownloadVideoParameter struct {
+	PT         int //payload type as in package header
+	SSRC       int
+	STREAMNAME string
+	STREAMTYPE int
+	RECORDID   string
+	CHANNEL    int
+	STARTTIME  string
+	ENDTIME    string
+	OFFSETFLAG int
+	OFFSET     int
+	IPANDPORT  string
+	SERIAL     int
+}
+
+//"OPERATION":"MEDIATASKSTART"  ACK (callback)
+type MediaStreamModelMediaTaskStartResponseParameter struct {
+	CSRC       string
+	IPANDPORT  string
+	PT         int //payload type as in package header
+	SSRC       int //128
+	STREAMNAME string
+}

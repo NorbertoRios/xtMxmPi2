@@ -3,7 +3,6 @@ package controller
 import (
 	"comm/channel"
 	"dto"
-	"fmt"
 	"strings"
 	"sync"
 )
@@ -29,13 +28,6 @@ func HandleTCPPacket(c channel.IChannel, buffer []byte) {
 	}
 	typeHandler := *ModuleMap[moduleName]
 	typeHandler.ParseDtoFromData(buffer).(ModuleHandler).HandleRequest(c, buffer)
-}
-
-func printDebugPackageInfo(buffer []byte) {
-	fmt.Printf("New packet: %X", buffer)
-	fmt.Println()
-	fmt.Printf("New packet as text: %s", buffer)
-	fmt.Println()
 }
 
 func ParseModuleName(buffer []byte) string {

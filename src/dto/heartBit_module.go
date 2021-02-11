@@ -33,6 +33,13 @@ func (h HeartBit) HandleRequest(channel channel.IChannel, buffer []byte) {
 	}
 }
 
+func PrintDebugPackageInfo(buffer []byte) {
+	fmt.Printf("Sending New packet: %X", buffer)
+	fmt.Println()
+	fmt.Printf("Sending New packet as text: %s", buffer)
+	fmt.Println()
+}
+
 func (h HeartBit) ParseDtoFromData(buffer []byte) interface{} {
 	if IsBinaryHeartBit(buffer) {
 		return &HeartBit{

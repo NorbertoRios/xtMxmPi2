@@ -20,6 +20,7 @@ type CertificateModule struct {
 
 func (d CertificateModule) HandleRequest(channel channel.IChannel, buffer []byte) {
 	d.checkDeviceIdentity(channel, d.PARAMETER.DSNO)
+	d.checkDeviceSession(channel, d.SESSION)
 	task := GetFirstByDeviceAndResponseType(channel.GetDevice(), CertificateModule{})
 	if task != nil {
 		task.ProcessResponse(d)
@@ -58,6 +59,14 @@ func (d CertificateModule) checkDeviceIdentity(channel channel.IChannel, deviceI
 			fmt.Printf("existing device identity: %v", deviceId)
 		} else {
 			fmt.Printf("new device identity: %v", deviceId)
+		}
+	}
+}
+
+func (d CertificateModule) checkDeviceSession(c channel.IChannel, session string) {
+	if c.GetCurrentSession() == "" {
+		if session != "" {
+			c.SetCurrentSession(session)
 		}
 	}
 }
