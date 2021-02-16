@@ -76,7 +76,9 @@ func RequestFile(c channel.IChannel, streamName string, streamType int, recordId
 	header := GeneralPackageHeader{}
 	marshal, _ := json.Marshal(m)
 	headerBytes := header.toHeaderBytes(uint(len(marshal)))
-	c.SendBytes(append(headerBytes, marshal...))
+	bytes := append(headerBytes, marshal...)
+	PrintDebugPackageInfo(bytes)
+	c.SendBytes(bytes)
 }
 
 //"OPERATION": "REQUESTDOWNLOADVIDEO"  ACK

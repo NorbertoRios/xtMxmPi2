@@ -13,19 +13,44 @@ type CertificateModule struct {
 	GeneralPackageHeader `json:"-"`
 	MODULE               string
 	OPERATION            string
-	PARAMETER            *CertificateParameter `json:",omitempty"`
+	PARAMETER            interface{} `json:",omitempty"`
 	SESSION              string
-	RESPONSE             *CertificateResponseError
+	RESPONSE             interface{}
 }
 
 func (d CertificateModule) HandleRequest(channel channel.IChannel, buffer []byte) {
-	d.checkDeviceIdentity(channel, d.PARAMETER.DSNO)
+	d.switchOnOperation(channel)
+}
+
+func (d *CertificateModule) switchOnOperation(channel channel.IChannel) {
+	switch d.OPERATION {
+	case "CREATESTREAM":
+		d.handleOperationCreateStream(channel)
+	case "CONNECT":
+		d.handleOperationConnect(channel)
+	}
+}
+
+func (d *CertificateModule) handleOperationCreateStream(channel channel.IChannel) {
+	sm := certificateCreateStreamResponse(channel.GetCurrentSession())
+	header := &GeneralPackageHeader{}
+	marshal, _ := json.Marshal(sm)
+	headerBytes := header.toHeaderBytes(uint(len(marshal)))
+	channel.SendBytes(append(headerBytes, marshal...))
+}
+
+func (d *CertificateModule) handleOperationConnect(channel channel.IChannel) {
+	rawParam := d.PARAMETER.(map[string]interface{})
+	mar, _ := json.Marshal(rawParam)
+	var cp *CertificateParameter
+	json.Unmarshal(mar, cp)
+	d.checkDeviceIdentity(channel, cp.DSNO)
 	d.checkDeviceSession(channel, d.SESSION)
 	task := GetFirstByDeviceAndResponseType(channel.GetDevice(), CertificateModule{})
 	if task != nil {
 		task.ProcessResponse(d)
 	}
-	response := certificateCreateValidResponse(d.SESSION)
+	response := certificateConnectCreateValidResponse(d.SESSION)
 	responseJ, _ := json.Marshal(response)
 	bytes := append(d.toHeaderBytes(uint(len(responseJ))), responseJ...)
 	err := channel.SendBytes(bytes)
@@ -98,7 +123,7 @@ func IsInstanceOf(objectPtr, typePtr interface{}) bool {
 	return reflect.TypeOf(objectPtr) == reflect.TypeOf(typePtr)
 }
 
-func certificateCreateValidResponse(session string) CertificateModule {
+func certificateConnectCreateValidResponse(session string) CertificateModule {
 	return CertificateModule{
 		MODULE:    "CERTIFICATE",
 		OPERATION: "CONNECT",
@@ -107,6 +132,18 @@ func certificateCreateValidResponse(session string) CertificateModule {
 			ERRORCODE:  0,
 			ERRORCAUSE: "",
 			MASKCMD:    57,
+		},
+	}
+}
+
+func certificateCreateStreamResponse(session string) CertificateModule {
+	return CertificateModule{
+		MODULE:    "CERTIFICATE",
+		OPERATION: "CREATESTREAM",
+		SESSION:   session,
+		RESPONSE: &OperationCreateStreamResponseError{
+			ERRORCODE:  0,
+			ERRORCAUSE: "",
 		},
 	}
 }
@@ -142,4 +179,16 @@ type CertificateParameter struct {
 	TSE      int
 	UNAME    string
 	UNO      string
+}
+
+type OperationCreateStreamParameter struct {
+	DEVTYPE    string
+	DSNO       string
+	STREAMNAME string
+	VISION     string
+}
+
+type OperationCreateStreamResponseError struct {
+	ERRORCODE  int
+	ERRORCAUSE string
 }
