@@ -43,6 +43,9 @@ func ParseHeaderBitMaskName(buffer []byte) string {
 	if dto.IsBinaryHeartBit(buffer) {
 		return "HEARTBIT"
 	}
+	if dto.IsVideo(buffer) {
+		return "VideoHandler"
+	}
 	return ""
 }
 
@@ -70,6 +73,8 @@ func InitModuleMap() {
 			MODULE: "STORM",
 		}
 		ModuleMap["STORM"] = &storm
+		var vh ModuleHandler = &dto.VideoHandlerModule{}
+		ModuleMap["VideoHandler"] = &vh
 	}
 	dto.DevicesQHolder = new(sync.Map)
 }

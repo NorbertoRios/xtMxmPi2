@@ -23,4 +23,6 @@ type IChannel interface {
 	SetDevice(*interfaces.Device)
 	GetCurrentSession() string
 	SetCurrentSession(s string)
+	SetVideoHandler(vh interface{})
+	GetVideoHandler() interface{}
 }

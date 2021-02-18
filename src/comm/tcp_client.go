@@ -19,6 +19,7 @@ type Client struct {
 	PageBuffer     *interface{}
 	Device         *interfaces.Device
 	Session        string
+	VideoHandler   *dto.VideoHandler
 }
 
 // Send text message to client
@@ -85,7 +86,7 @@ func (c *Client) Listen() {
 		c.Received = c.Received + int64(count)
 		ServerCounters.AddFloat("Received", float64(count))
 		tb := buffer[:count]
-		justPrint(tb)
+		//justPrint(tb)
 		segmentBuffer := handleTCPWithTSO(tso, tb, c)
 		for segmentBuffer != nil {
 			segmentBuffer = handleTCPWithTSO(tso, segmentBuffer, c)
@@ -96,10 +97,13 @@ func (c *Client) Listen() {
 func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) []byte {
 	if tso.segmentationInProgress {
 		fmt.Println("SEG IN PROGRESS")
+
+		fmt.Println(tso.bytesNeeded)
+		fmt.Printf(" needed, now size is %v", len(tso.buffer))
 		if added, overflow := tso.addSegment(buffer); added {
 			if tso.isBufferReady() {
 				fmt.Println("buffer is ready to release TSO")
-				controller.HandleTCPPacket(c, buffer)
+				controller.HandleTCPPacket(c, tso.buffer)
 				tso.resetBuffer()
 			}
 			if overflow != nil && len(overflow) > 0 {
@@ -109,11 +113,15 @@ func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) []byte {
 			controller.HandleTCPPacket(c, buffer)
 		}
 	} else if IsSegmented(buffer) {
-		fmt.Println("SEGMENTATION FOUND IN PACKAGE :")
-		fmt.Printf(" %s", buffer)
+		fmt.Println()
+		fmt.Print("SEGMENTATION FOUND IN PACKAGE :")
+		fmt.Printf(" %x", buffer[:12])
 		tso.initBuffer(buffer)
-	} else if segment := dto.ContainsAdditionalTCPSegment(buffer); segment != nil { //if merged
-		return segment
+	} else if segmented, first, overflow := dto.ContainsAdditionalTCPSegment(buffer); segmented { //if merged
+		controller.HandleTCPPacket(c, first)
+		return overflow
+	} else if len(buffer) < 12 {
+		tso.initBufferWithPartialHeader(buffer)
 	} else {
 		controller.HandleTCPPacket(c, buffer)
 	}
@@ -154,4 +162,11 @@ func (c *Client) GetCurrentSession() string {
 
 func (c *Client) SetCurrentSession(s string) {
 	c.Session = s
+}
+
+func (c *Client) SetVideoHandler(vh interface{}) {
+	c.VideoHandler = vh.(*dto.VideoHandler)
+}
+func (c *Client) GetVideoHandler() interface{} {
+	return c.VideoHandler
 }

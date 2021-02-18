@@ -37,13 +37,16 @@ func (p *GeneralPackageHeader) FillGeneralPackageHeaderFromPackage(buffer []byte
 	return p
 }
 
-func ContainsAdditionalTCPSegment(buffer []byte) []byte {
+func ContainsAdditionalTCPSegment(buffer []byte) (bool, []byte, []byte) {
+	if len(buffer) < 12 {
+		return false, nil, nil //partial header
+	}
 	payloadLen := uint(buffer[4])<<24 + uint(buffer[5])<<16 + uint(buffer[6])<<8 + uint(buffer[7])
 	if int(payloadLen+12) < len(buffer) {
 		ovBuffer := buffer[payloadLen+12:]
-		return ovBuffer
+		return true, buffer[:len(buffer)-len(ovBuffer)], ovBuffer
 	} else {
-		return nil
+		return false, nil, nil
 	}
 }
 

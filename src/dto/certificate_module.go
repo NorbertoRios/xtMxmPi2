@@ -43,8 +43,10 @@ func (d *CertificateModule) handleOperationConnect(channel channel.IChannel) {
 	rawParam := d.PARAMETER.(map[string]interface{})
 	mar, _ := json.Marshal(rawParam)
 	var cp *CertificateParameter
-	json.Unmarshal(mar, cp)
-	d.checkDeviceIdentity(channel, cp.DSNO)
+	errM := json.Unmarshal(mar, cp)
+	if errM != nil && cp != nil {
+		d.checkDeviceIdentity(channel, cp.DSNO)
+	}
 	d.checkDeviceSession(channel, d.SESSION)
 	task := GetFirstByDeviceAndResponseType(channel.GetDevice(), CertificateModule{})
 	if task != nil {

@@ -14,6 +14,7 @@ type TSOBuffer struct {
 	currentPayloadLen      int
 	bytesNeeded            int
 	segmentationInProgress bool
+	segmentedHeaderPrefix  []byte
 }
 
 func (b *TSOBuffer) resetBuffer() {
@@ -25,21 +26,41 @@ func (b *TSOBuffer) resetBuffer() {
 	b.bytesNeeded = 0
 	b.segmentationInProgress = false
 	b.header = nil
+	b.segmentedHeaderPrefix = nil
 }
 
 func (b *TSOBuffer) initBuffer(buffer []byte) {
-	b.resetBuffer()
+	prefPresent := b.segmentedHeaderPrefix != nil
+	b.buffer = make([]byte, 0)
+	if !prefPresent {
+		b.resetBuffer()
+	} else {
+		b.buffer = append(b.buffer, b.segmentedHeaderPrefix...)
+		b.segmentedHeaderPrefix = nil
+	}
+	b.buffer = append(b.buffer, buffer...)
 	h := &dto.GeneralPackageHeader{}
-	b.header = h.FillGeneralPackageHeaderFromPackage(buffer)
-	b.buffer = make([]byte, 4096)
+	b.header = h.FillGeneralPackageHeaderFromPackage(b.buffer)
 	b.timeCreated = time.Now()
 	b.expectedPayloadLen = b.header.PayloadLen
-	b.currentPayloadLen = len(buffer) - 12
+	b.currentPayloadLen = len(b.buffer) - 12
 	b.bytesNeeded = int(b.header.PayloadLen) - b.currentPayloadLen
 	b.segmentationInProgress = true
 }
 
+func (b *TSOBuffer) initBufferWithPartialHeader(buffer []byte) {
+	b.resetBuffer()
+	b.segmentationInProgress = true
+	b.segmentedHeaderPrefix = make([]byte, 0)
+	b.segmentedHeaderPrefix = append(b.segmentedHeaderPrefix, buffer...)
+}
+
 func (b *TSOBuffer) addSegment(segment []byte) (bool, []byte) {
+	if prefPresent := b.segmentedHeaderPrefix != nil; prefPresent {
+		leftForHeader := 12 - len(b.segmentedHeaderPrefix)
+		b.initBuffer(segment[:leftForHeader])
+		segment = segment[leftForHeader:]
+	}
 	if b.segmentationInProgress {
 		if len(segment) <= b.bytesNeeded {
 			b.buffer = append(b.buffer, segment...)
@@ -47,16 +68,12 @@ func (b *TSOBuffer) addSegment(segment []byte) (bool, []byte) {
 			b.bytesNeeded = int(b.expectedPayloadLen) - b.currentPayloadLen
 			return true, nil
 		} else {
+			ovIndex := b.bytesNeeded
 			b.buffer = append(b.buffer, segment[:b.bytesNeeded]...)
 			b.currentPayloadLen += b.bytesNeeded
 			b.bytesNeeded = int(b.expectedPayloadLen) - b.currentPayloadLen
-			if b.bytesNeeded >= 1 {
-				overflowBuffer := segment[b.bytesNeeded-1:]
-				b.resetBuffer()
-				return true, overflowBuffer
-			}
-			b.resetBuffer()
-			return true, nil
+			overflowBuffer := segment[ovIndex:]
+			return true, overflowBuffer
 		}
 	}
 	return false, nil

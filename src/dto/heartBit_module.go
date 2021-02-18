@@ -30,7 +30,46 @@ func (h HeartBit) HandleRequest(channel channel.IChannel, buffer []byte) {
 		if err != nil {
 			fmt.Errorf("HandleRequest %e", err)
 		}
+		fmt.Println("got keep_alive")
+		//OperationQueryFileListRequest(channel,
+		//	"ad54b3ad-1493-41bf-9829-eaf5e1623582",
+		//	"20210216030000",
+		//	"20210216220000", 255)
+
+		//funcName(channel)
+
 	}
+}
+
+func funcName(channel channel.IChannel) {
+	request := `{
+		 "MODULE": "MEDIASTREAMMODEL",
+		 "SESSION": "2a741181-a3b3-422d-9e7b-a2afbab8ec09",
+		 "OPERATION": "REQUESTDOWNLOADVIDEO",
+		 "PARAMETER": {
+		   "PT": 3,
+		   "SSRC": 128,
+		   "STREAMNAME": "mystream126453",
+		   "STREAMTYPE": 1,
+		   "RECORDID": "0-0-150",
+		   "CHANNEL": 0,
+		   "STARTTIME": "20210202035818",
+		   "ENDTIME": "20210202135921",
+		   "OFFSETFLAG": 1,
+		   "OFFSET": 0,
+		   "IPANDPORT": "192.168.88.253:8081",
+		   "SERIAL": 46009
+		 }
+		}`
+	message := []byte(request)
+	b := &bytes2.Buffer{}
+	//write, err := b.Write(message)
+	json.Compact(b, message)
+	PrintDebugPackageInfo(b.Bytes())
+	header := GeneralPackageHeader{}
+	headerBytes := header.toHeaderBytes(uint(len(b.Bytes())))
+	res := append(headerBytes, b.Bytes()...)
+	channel.SendBytes(res)
 }
 
 func PrintDebugPackageInfo(buffer []byte) {
@@ -83,4 +122,12 @@ func IsBinaryHeartBit(buffer []byte) bool {
 	} else {
 		return false
 	}
+}
+
+func IsVideo(buffer []byte) bool {
+	gp := (&GeneralPackageHeader{}).FillGeneralPackageHeaderFromPackage(buffer)
+	if gp.PayloadType == 3 {
+		return true
+	}
+	return false
 }
