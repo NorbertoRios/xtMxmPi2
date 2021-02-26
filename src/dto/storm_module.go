@@ -3,6 +3,7 @@ package dto
 import (
 	"comm/channel"
 	"encoding/json"
+	"fmt"
 )
 
 type Storm struct {
@@ -43,6 +44,7 @@ func OperationGetCalendarRequest(c channel.IChannel, qMonth string, session stri
 }
 
 func (s Storm) HandleRequest(c channel.IChannel, buffer []byte) {
+	fmt.Println(string(buffer))
 	var m map[string]interface{}
 	json.Unmarshal(s.PayloadBody, &m)
 	rm := m["RESPONSE"].(map[string]interface{})

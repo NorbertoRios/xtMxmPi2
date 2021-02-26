@@ -44,6 +44,6 @@ func createFile(name string) *os.File {
 
 func createVideoHandler() *VideoHandler {
 	return &VideoHandler{
-		videoFile: createFile("server_file"),
+		videoFile: createFile("server_file_raw"),
 	}
 }

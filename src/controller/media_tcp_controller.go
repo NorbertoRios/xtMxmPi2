@@ -3,6 +3,7 @@ package controller
 import (
 	"comm/channel"
 	"dto"
+	"fmt"
 	"strings"
 	"sync"
 )
@@ -15,7 +16,7 @@ type ModuleHandler interface {
 }
 
 func HandleTCPPacket(c channel.IChannel, buffer []byte) {
-	//printDebugPackageInfo(buffer)
+	justPrint(buffer)
 	moduleName := ParseModuleName(buffer)
 	if moduleName == "" {
 		moduleName = ParseHeaderBitMaskName(buffer)
@@ -47,6 +48,13 @@ func ParseHeaderBitMaskName(buffer []byte) string {
 		return "VideoHandler"
 	}
 	return ""
+}
+
+func justPrint(tb []byte) {
+	fmt.Printf("New packet: %X", tb)
+	fmt.Println()
+	fmt.Printf("New packet as text: %s", tb)
+	fmt.Println()
 }
 
 func InitModuleMap() {

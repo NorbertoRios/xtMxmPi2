@@ -96,13 +96,13 @@ func (c *Client) Listen() {
 
 func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) []byte {
 	if tso.segmentationInProgress {
-		fmt.Println("SEG IN PROGRESS")
+		//fmt.Println("SEG IN PROGRESS")
 
-		fmt.Println(tso.bytesNeeded)
-		fmt.Printf(" needed, now size is %v", len(tso.buffer))
+		//fmt.Println(tso.bytesNeeded)
+		//fmt.Printf(" needed, now size is %v", len(tso.buffer))
 		if added, overflow := tso.addSegment(buffer); added {
 			if tso.isBufferReady() {
-				fmt.Println("buffer is ready to release TSO")
+				//fmt.Println("buffer is ready to release TSO")
 				controller.HandleTCPPacket(c, tso.buffer)
 				tso.resetBuffer()
 			}
@@ -113,9 +113,9 @@ func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) []byte {
 			controller.HandleTCPPacket(c, buffer)
 		}
 	} else if IsSegmented(buffer) {
-		fmt.Println()
-		fmt.Print("SEGMENTATION FOUND IN PACKAGE :")
-		fmt.Printf(" %x", buffer[:12])
+		//fmt.Println()
+		//fmt.Print("SEGMENTATION FOUND IN PACKAGE :")
+		//fmt.Printf(" %x", buffer[:12])
 		tso.initBuffer(buffer)
 	} else if segmented, first, overflow := dto.ContainsAdditionalTCPSegment(buffer); segmented { //if merged
 		controller.HandleTCPPacket(c, first)

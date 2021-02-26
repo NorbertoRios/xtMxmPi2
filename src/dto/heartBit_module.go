@@ -1,6 +1,7 @@
 package dto
 
 import (
+	bytes2 "bytes"
 	"comm/channel"
 	"encoding/json"
 	"fmt"
@@ -31,10 +32,6 @@ func (h HeartBit) HandleRequest(channel channel.IChannel, buffer []byte) {
 			fmt.Errorf("HandleRequest %e", err)
 		}
 		fmt.Println("got keep_alive")
-		//OperationQueryFileListRequest(channel,
-		//	"ad54b3ad-1493-41bf-9829-eaf5e1623582",
-		//	"20210216030000",
-		//	"20210216220000", 255)
 
 		//funcName(channel)
 
