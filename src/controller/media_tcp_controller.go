@@ -16,7 +16,7 @@ type ModuleHandler interface {
 }
 
 func HandleTCPPacket(c channel.IChannel, buffer []byte) {
-	justPrint(buffer)
+	//justPrint(buffer)
 	moduleName := ParseModuleName(buffer)
 	if moduleName == "" {
 		moduleName = ParseHeaderBitMaskName(buffer)

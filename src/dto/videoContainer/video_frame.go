@@ -32,11 +32,47 @@ func ParseVideoFrameHeader(buffer []byte) *VideoFrameHeader {
 	return h
 }
 
+func ParseIntegerFrames(b []byte) []*VideoFrame {
+	if len(b) < 12 {
+		return nil
+	}
+	vf := make([]*VideoFrame, 0)
+	for i, l := 0, len(b); i < l; {
+		var frame *VideoFrame
+		if i+12 < l {
+			header := ParseVideoFrameHeader(b[i : i+12])
+			frL := header.ExtendedLen + header.FrameLen + 12
+			if frL <= len(b) {
+				frame = ParseVideoFrame(b[i : i+frL])
+				if frame != nil {
+					vf = append(vf, frame)
+				}
+				i += frL
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
+	return vf
+}
+
 func ParseVideoFrame(b []byte) *VideoFrame {
 	if len(b) < 12 {
 		return nil
 	}
 	v := &VideoFrame{}
+	v.RawHeader = b[:12]
+	v.Header = ParseVideoFrameHeader(v.RawHeader)
+	start := 11 + v.Header.ExtendedLen
+	end := 12 + v.Header.ExtendedLen + v.Header.FrameLen
+	if start < len(b) && end <= len(b) {
+		v.Data = b[start:end]
+		v.Extension = b[11 : 12+v.Header.ExtendedLen]
+	} else {
+		return nil
+	}
 	return v
 }
 
@@ -56,7 +92,7 @@ const (
 
 func ReverseOrder(arr []byte) []byte {
 	rev := make([]byte, 0)
-	copy(rev, arr)
+	rev = append(rev, arr...)
 	for i, j := 0, len(rev)-1; i < j; i, j = i+1, j-1 {
 		rev[i], rev[j] = rev[j], rev[i]
 	}

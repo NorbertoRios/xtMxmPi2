@@ -2,6 +2,7 @@ package dto
 
 import (
 	"comm/channel"
+	"dto/videoContainer"
 	"fmt"
 	"os"
 )
@@ -15,17 +16,27 @@ type VideoHandlerModule struct {
 }
 
 func (v VideoHandlerModule) HandleRequest(c channel.IChannel, buffer []byte) {
-	fmt.Printf("new video package with %v bytes", len(buffer))
+	//fmt.Printf("new video package with %v bytes", len(buffer))
 	handler := c.GetVideoHandler().(*VideoHandler)
 	if handler == nil {
 		vh := interface{}(createVideoHandler())
 		c.SetVideoHandler(vh)
 		videoHandler := vh.(*VideoHandler)
-		videoHandler.videoFile.Write(buffer)
+		frames := videoContainer.ParseIntegerFrames(buffer[12:])
+		for _, fr := range frames {
+			if fr.Header.FrameType == videoContainer.H264I || fr.Header.FrameType == videoContainer.H264P {
+				videoHandler.videoFile.Write(fr.Data)
+			}
+		}
 	} else {
 		bb := buffer[12:]
-		handler.videoFile.WriteAt(bb, handler.offset)
-		handler.offset += int64(len(bb))
+		frames := videoContainer.ParseIntegerFrames(bb)
+		for _, fr := range frames {
+			if fr.Header.FrameType == videoContainer.H264I || fr.Header.FrameType == videoContainer.H264P {
+				handler.videoFile.WriteAt(fr.Data, handler.offset)
+				handler.offset += int64(len(fr.Data))
+			}
+		}
 	}
 }
 
@@ -44,6 +55,6 @@ func createFile(name string) *os.File {
 
 func createVideoHandler() *VideoHandler {
 	return &VideoHandler{
-		videoFile: createFile("server_file_raw"),
+		videoFile: createFile("server_file_h264"),
 	}
 }
