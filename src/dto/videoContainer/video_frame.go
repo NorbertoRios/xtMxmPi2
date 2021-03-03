@@ -1,5 +1,9 @@
 package videoContainer
 
+import (
+	"interfaces"
+)
+
 type VideoFrame struct {
 	RawHeader []byte
 	Header    *VideoFrameHeader // 12 byte
@@ -97,4 +101,26 @@ func ReverseOrder(arr []byte) []byte {
 		rev[i], rev[j] = rev[j], rev[i]
 	}
 	return rev
+}
+
+func (v VideoFrameHeader) FillHeaderFromPackage(buffer []byte) interfaces.AbstractHeader {
+	var r interfaces.AbstractHeader = ParseVideoFrameHeader(buffer)
+	return r
+}
+
+func (v VideoFrameHeader) GetPayloadLen() uint {
+	return uint(v.ExtendedLen + v.FrameLen)
+}
+
+func (v VideoFrameHeader) IsSegmented(buffer []byte) bool {
+	if len(buffer) < 12 {
+		return false
+	}
+	h := ParseVideoFrameHeader(buffer)
+	pLen := h.FrameLen + h.ExtendedLen
+	if len(buffer) < pLen+12 {
+		return true
+	} else {
+		return false
+	}
 }

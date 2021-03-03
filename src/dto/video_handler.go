@@ -22,14 +22,14 @@ func (v VideoHandlerModule) HandleRequest(c channel.IChannel, buffer []byte) {
 		vh := interface{}(createVideoHandler())
 		c.SetVideoHandler(vh)
 		videoHandler := vh.(*VideoHandler)
-		frames := videoContainer.ParseIntegerFrames(buffer[12:])
+		frames := videoContainer.ParseIntegerFrames(buffer[:])
 		for _, fr := range frames {
 			if fr.Header.FrameType == videoContainer.H264I || fr.Header.FrameType == videoContainer.H264P {
 				videoHandler.videoFile.Write(fr.Data)
 			}
 		}
 	} else {
-		bb := buffer[12:]
+		bb := buffer[:]
 		frames := videoContainer.ParseIntegerFrames(bb)
 		for _, fr := range frames {
 			if fr.Header.FrameType == videoContainer.H264I || fr.Header.FrameType == videoContainer.H264P {

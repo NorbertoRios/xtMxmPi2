@@ -1,5 +1,9 @@
 package dto
 
+import (
+	"interfaces"
+)
+
 type GeneralPackageHeader struct {
 	V            uint8  // 1,2 bits
 	P            bool   // 3 bit
@@ -77,5 +81,26 @@ func bool2int(a bool) byte {
 		return 1
 	} else {
 		return 0
+	}
+}
+
+func (p *GeneralPackageHeader) FillHeaderFromPackage(buffer []byte) interfaces.AbstractHeader {
+	var r interfaces.AbstractHeader = p.FillGeneralPackageHeaderFromPackage(buffer)
+	return r
+}
+
+func (p *GeneralPackageHeader) GetPayloadLen() uint {
+	return p.PayloadLen
+}
+
+func (p *GeneralPackageHeader) IsSegmented(buffer []byte) bool {
+	if len(buffer) < 12 {
+		return false
+	}
+	pLen := uint(buffer[4])<<24 + uint(buffer[5])<<16 + uint(buffer[6])<<8 + uint(buffer[7])
+	if len(buffer) < int(pLen)+12 {
+		return true
+	} else {
+		return false
 	}
 }

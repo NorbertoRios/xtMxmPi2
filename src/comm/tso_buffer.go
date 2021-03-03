@@ -1,12 +1,14 @@
 package comm
 
 import (
+	"controller"
 	"dto"
+	"interfaces"
 	"time"
 )
 
 type TSOBuffer struct {
-	header                 *dto.GeneralPackageHeader
+	header                 interfaces.AbstractHeader
 	buffer                 []byte
 	ttlSeconds             int
 	timeCreated            time.Time
@@ -29,7 +31,7 @@ func (b *TSOBuffer) resetBuffer() {
 	b.segmentedHeaderPrefix = nil
 }
 
-func (b *TSOBuffer) initBuffer(buffer []byte) {
+func (b *TSOBuffer) initBuffer(buffer []byte, h interfaces.AbstractHeader) {
 	prefPresent := b.segmentedHeaderPrefix != nil
 	b.buffer = make([]byte, 0)
 	if !prefPresent {
@@ -39,12 +41,11 @@ func (b *TSOBuffer) initBuffer(buffer []byte) {
 		b.segmentedHeaderPrefix = nil
 	}
 	b.buffer = append(b.buffer, buffer...)
-	h := &dto.GeneralPackageHeader{}
-	b.header = h.FillGeneralPackageHeaderFromPackage(b.buffer)
+	b.header = h.FillHeaderFromPackage(b.buffer)
 	b.timeCreated = time.Now()
-	b.expectedPayloadLen = b.header.PayloadLen
+	b.expectedPayloadLen = b.header.GetPayloadLen()
 	b.currentPayloadLen = len(b.buffer) - 12
-	b.bytesNeeded = int(b.header.PayloadLen) - b.currentPayloadLen
+	b.bytesNeeded = int(b.header.GetPayloadLen()) - b.currentPayloadLen
 	b.segmentationInProgress = true
 }
 
@@ -55,10 +56,10 @@ func (b *TSOBuffer) initBufferWithPartialHeader(buffer []byte) {
 	b.segmentedHeaderPrefix = append(b.segmentedHeaderPrefix, buffer...)
 }
 
-func (b *TSOBuffer) addSegment(segment []byte) (bool, []byte) {
+func (b *TSOBuffer) addSegment(segment []byte, h interfaces.AbstractHeader) (bool, []byte) {
 	if prefPresent := b.segmentedHeaderPrefix != nil; prefPresent {
 		leftForHeader := 12 - len(b.segmentedHeaderPrefix)
-		b.initBuffer(segment[:leftForHeader])
+		b.initBuffer(segment[:leftForHeader], h)
 		segment = segment[leftForHeader:]
 	}
 	if b.segmentationInProgress {
@@ -88,14 +89,36 @@ func (b *TSOBuffer) isBufferReady() bool {
 	}
 }
 
-func IsSegmented(buffer []byte) bool {
-	if len(buffer) < 12 {
-		return false
-	}
-	pLen := uint(buffer[4])<<24 + uint(buffer[5])<<16 + uint(buffer[6])<<8 + uint(buffer[7])
-	if len(buffer) < int(pLen)+12 {
-		return true
+func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client, h interfaces.AbstractHeader) []byte {
+	if tso.segmentationInProgress {
+		//fmt.Println("SEG IN PROGRESS")
+
+		//fmt.Println(tso.bytesNeeded)
+		//fmt.Printf(" needed, now size is %v", len(tso.buffer))
+		if added, overflow := tso.addSegment(buffer, h); added {
+			if tso.isBufferReady() {
+				//fmt.Println("buffer is ready to release TSO")
+				controller.HandleTCPPacket(c, tso.buffer)
+				tso.resetBuffer()
+			}
+			if overflow != nil && len(overflow) > 0 {
+				return overflow
+			}
+		} else {
+			controller.HandleTCPPacket(c, buffer)
+		}
+	} else if h.IsSegmented(buffer) {
+		//fmt.Println()
+		//fmt.Print("SEGMENTATION FOUND IN PACKAGE :")
+		//fmt.Printf(" %x", buffer[:12])
+		tso.initBuffer(buffer, h)
+	} else if segmented, first, overflow := dto.ContainsAdditionalTCPSegment(buffer); segmented { //if merged
+		controller.HandleTCPPacket(c, first)
+		return overflow
+	} else if len(buffer) < 12 {
+		tso.initBufferWithPartialHeader(buffer)
 	} else {
-		return false
+		controller.HandleTCPPacket(c, buffer)
 	}
+	return nil
 }

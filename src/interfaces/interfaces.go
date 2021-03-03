@@ -17,3 +17,9 @@ type Task interface {
 	GetType() interface{}
 	ProcessResponse(interface{})
 }
+
+type AbstractHeader interface {
+	FillHeaderFromPackage(buffer []byte) AbstractHeader
+	GetPayloadLen() uint
+	IsSegmented(buffer []byte) bool
+}

@@ -134,7 +134,7 @@ func OperationQueryFileListRequest(c channel.IChannel, session string, startTime
 		STARTTIME:  startTime,
 		CHANNEL:    chMask,
 		ENDTIME:    endTime,
-		STREAMTYPE: 1,
+		STREAMTYPE: 256,
 		FILETYPE:   65535,
 		RFSTORAGE:  0,
 	}

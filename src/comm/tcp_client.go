@@ -1,7 +1,6 @@
 package comm
 
 import (
-	"controller"
 	"dto"
 	"fmt"
 	"interfaces"
@@ -87,45 +86,11 @@ func (c *Client) Listen() {
 		ServerCounters.AddFloat("Received", float64(count))
 		tb := buffer[:count]
 		//justPrint(tb)
-		segmentBuffer := handleTCPWithTSO(tso, tb, c)
+		segmentBuffer := handleTCPWithTSO(tso, tb, c, &dto.GeneralPackageHeader{})
 		for segmentBuffer != nil {
-			segmentBuffer = handleTCPWithTSO(tso, segmentBuffer, c)
+			segmentBuffer = handleTCPWithTSO(tso, segmentBuffer, c, &dto.GeneralPackageHeader{})
 		}
 	}
-}
-
-func handleTCPWithTSO(tso *TSOBuffer, buffer []byte, c *Client) []byte {
-	if tso.segmentationInProgress {
-		//fmt.Println("SEG IN PROGRESS")
-
-		//fmt.Println(tso.bytesNeeded)
-		//fmt.Printf(" needed, now size is %v", len(tso.buffer))
-		if added, overflow := tso.addSegment(buffer); added {
-			if tso.isBufferReady() {
-				//fmt.Println("buffer is ready to release TSO")
-				controller.HandleTCPPacket(c, tso.buffer)
-				tso.resetBuffer()
-			}
-			if overflow != nil && len(overflow) > 0 {
-				return overflow
-			}
-		} else {
-			controller.HandleTCPPacket(c, buffer)
-		}
-	} else if IsSegmented(buffer) {
-		//fmt.Println()
-		//fmt.Print("SEGMENTATION FOUND IN PACKAGE :")
-		//fmt.Printf(" %x", buffer[:12])
-		tso.initBuffer(buffer)
-	} else if segmented, first, overflow := dto.ContainsAdditionalTCPSegment(buffer); segmented { //if merged
-		controller.HandleTCPPacket(c, first)
-		return overflow
-	} else if len(buffer) < 12 {
-		tso.initBufferWithPartialHeader(buffer)
-	} else {
-		controller.HandleTCPPacket(c, buffer)
-	}
-	return nil
 }
 
 func justPrint(tb []byte) {
