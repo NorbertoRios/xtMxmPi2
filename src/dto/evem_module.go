@@ -1,9 +1,9 @@
 package dto
 
 import (
-	"comm/channel"
 	"encoding/json"
 	"fmt"
+	"interfaces"
 )
 
 type Evem struct {
@@ -111,7 +111,7 @@ func (e Evem) createResponse(eP *ActualDSMAlarmParameter) Evem {
 	}
 }
 
-func (e Evem) HandleRequest(channel channel.IChannel, buffer []byte) {
+func (e Evem) HandleRequest(channel interfaces.IChannel, buffer []byte) {
 	jBytes := e.callAlarmHandler()
 	bytes := append(e.toHeaderBytes(uint(len(jBytes))), jBytes...)
 	err := channel.SendBytes(bytes)

@@ -124,3 +124,17 @@ func (v VideoFrameHeader) IsSegmented(buffer []byte) bool {
 		return false
 	}
 }
+
+func (v VideoFrameHeader) ContainsAdditionalTCPSegment(buffer []byte) (bool, []byte, []byte) {
+	if len(buffer) < 12 {
+		return false, nil, nil //partial header
+	}
+	h := ParseVideoFrameHeader(buffer)
+	payloadLen := h.FrameLen + h.ExtendedLen
+	if payloadLen+12 < len(buffer) {
+		ovBuffer := buffer[payloadLen+12:]
+		return true, buffer[:len(buffer)-len(ovBuffer)], ovBuffer
+	} else {
+		return false, nil, nil
+	}
+}

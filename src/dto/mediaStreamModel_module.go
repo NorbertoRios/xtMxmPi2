@@ -1,9 +1,9 @@
 package dto
 
 import (
-	"comm/channel"
 	"config"
 	"encoding/json"
+	"interfaces"
 	"math/rand"
 	"strconv"
 )
@@ -17,7 +17,7 @@ type MediaStreamModel struct {
 	RESPONSE             interface{} `json:",omitempty"`
 }
 
-func (m MediaStreamModel) HandleRequest(c channel.IChannel, buffer []byte) {
+func (m MediaStreamModel) HandleRequest(c interfaces.IChannel, buffer []byte) {
 	switch m.OPERATION {
 	case "REQUESTDOWNLOADVIDEO":
 		m.handleRequestDownloadVideoResponse(c, buffer)
@@ -44,14 +44,14 @@ func (m MediaStreamModel) ParseDtoFromData(buffer []byte) interface{} {
 	return result
 }
 
-func (m MediaStreamModel) handleRequestDownloadVideoResponse(c channel.IChannel, buffer []byte) {
+func (m MediaStreamModel) handleRequestDownloadVideoResponse(c interfaces.IChannel, buffer []byte) {
 
 }
-func (m MediaStreamModel) handleMediaTaskStartResponse(c channel.IChannel, buffer []byte) {
+func (m MediaStreamModel) handleMediaTaskStartResponse(c interfaces.IChannel, buffer []byte) {
 
 }
 
-func RequestFile(c channel.IChannel, streamName string, streamType int, recordId string, channel int, startTime string, endTime string) {
+func RequestFile(c interfaces.IChannel, streamName string, streamType int, recordId string, channel int, startTime string, endTime string) {
 	m := &MediaStreamModel{
 		GeneralPackageHeader: GeneralPackageHeader{},
 		MODULE:               "MEDIASTREAMMODEL",

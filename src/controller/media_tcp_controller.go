@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"comm/channel"
 	"dto"
 	"fmt"
+	"interfaces"
 	"strings"
 	"sync"
 )
@@ -11,11 +11,11 @@ import (
 var ModuleMap map[string]*ModuleHandler
 
 type ModuleHandler interface {
-	HandleRequest(c channel.IChannel, buffer []byte)
+	HandleRequest(c interfaces.IChannel, buffer []byte)
 	ParseDtoFromData(buffer []byte) interface{}
 }
 
-func HandleTCPPacket(c channel.IChannel, buffer []byte) {
+func HandleTCPPacket(c interfaces.IChannel, buffer []byte) {
 	//justPrint(buffer)
 	moduleName := ParseModuleName(buffer)
 	if moduleName == "" {

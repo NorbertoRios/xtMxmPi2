@@ -1,6 +1,7 @@
 package comm
 
 import (
+	"controller"
 	"dto"
 	"fmt"
 	"interfaces"
@@ -74,7 +75,7 @@ func (c *Client) RemotePort() int {
 //Listen client data from channel
 func (c *Client) Listen() {
 	buffer := make([]byte, 4096)
-	tso := &TSOBuffer{}
+	tso := &dto.TSOBuffer{}
 	for {
 		count, err := c.Connection.Read(buffer)
 		if err != nil {
@@ -86,9 +87,9 @@ func (c *Client) Listen() {
 		ServerCounters.AddFloat("Received", float64(count))
 		tb := buffer[:count]
 		//justPrint(tb)
-		segmentBuffer := handleTCPWithTSO(tso, tb, c, &dto.GeneralPackageHeader{})
+		segmentBuffer := dto.HandlePackageWithSO(tso, tb, c, &dto.GeneralPackageHeader{}, controller.HandleTCPPacket)
 		for segmentBuffer != nil {
-			segmentBuffer = handleTCPWithTSO(tso, segmentBuffer, c, &dto.GeneralPackageHeader{})
+			segmentBuffer = dto.HandlePackageWithSO(tso, segmentBuffer, c, &dto.GeneralPackageHeader{}, controller.HandleTCPPacket)
 		}
 	}
 }

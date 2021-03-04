@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"comm/channel"
 	"container/list"
 	"encoding/json"
 	"fmt"
@@ -18,11 +17,11 @@ type CertificateModule struct {
 	RESPONSE             interface{}
 }
 
-func (d CertificateModule) HandleRequest(channel channel.IChannel, buffer []byte) {
+func (d CertificateModule) HandleRequest(channel interfaces.IChannel, buffer []byte) {
 	d.switchOnOperation(channel)
 }
 
-func (d *CertificateModule) switchOnOperation(channel channel.IChannel) {
+func (d *CertificateModule) switchOnOperation(channel interfaces.IChannel) {
 	switch d.OPERATION {
 	case "CREATESTREAM":
 		d.handleOperationCreateStream(channel)
@@ -31,7 +30,7 @@ func (d *CertificateModule) switchOnOperation(channel channel.IChannel) {
 	}
 }
 
-func (d *CertificateModule) handleOperationCreateStream(channel channel.IChannel) {
+func (d *CertificateModule) handleOperationCreateStream(channel interfaces.IChannel) {
 	sm := certificateCreateStreamResponse(channel.GetCurrentSession())
 	header := &GeneralPackageHeader{}
 	marshal, _ := json.Marshal(sm)
@@ -39,7 +38,7 @@ func (d *CertificateModule) handleOperationCreateStream(channel channel.IChannel
 	channel.SendBytes(append(headerBytes, marshal...))
 }
 
-func (d *CertificateModule) handleOperationConnect(channel channel.IChannel) {
+func (d *CertificateModule) handleOperationConnect(channel interfaces.IChannel) {
 	rawParam := d.PARAMETER.(map[string]interface{})
 	mar, _ := json.Marshal(rawParam)
 	var cp *CertificateParameter
@@ -76,7 +75,7 @@ func (d CertificateModule) ParseDtoFromData(buffer []byte) interface{} {
 	return wd
 }
 
-func (d CertificateModule) checkDeviceIdentity(channel channel.IChannel, deviceId string) {
+func (d CertificateModule) checkDeviceIdentity(channel interfaces.IChannel, deviceId string) {
 	if channel.GetDevice() == nil {
 		var id interfaces.Device = CameraDevice{Id: deviceId}
 		_, loaded := DevicesQHolder.LoadOrStore(id, QueueHolder{Q: list.New()})
@@ -90,7 +89,7 @@ func (d CertificateModule) checkDeviceIdentity(channel channel.IChannel, deviceI
 	}
 }
 
-func (d CertificateModule) checkDeviceSession(c channel.IChannel, session string) {
+func (d CertificateModule) checkDeviceSession(c interfaces.IChannel, session string) {
 	if c.GetCurrentSession() == "" {
 		if session != "" {
 			c.SetCurrentSession(session)

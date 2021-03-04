@@ -1,9 +1,9 @@
 package dto
 
 import (
-	"comm/channel"
 	"encoding/json"
 	"fmt"
+	"interfaces"
 )
 
 type Storm struct {
@@ -23,7 +23,7 @@ type GetCalendarRequestParameter struct {
 	QUERYTIME    string
 }
 
-func OperationGetCalendarRequest(c channel.IChannel, qMonth string, session string) {
+func OperationGetCalendarRequest(c interfaces.IChannel, qMonth string, session string) {
 	s := &Storm{
 		GeneralPackageHeader: GeneralPackageHeader{},
 		MODULE:               "STORM",
@@ -43,7 +43,7 @@ func OperationGetCalendarRequest(c channel.IChannel, qMonth string, session stri
 	c.SendBytes(append(s.GeneralPackageHeader.toHeaderBytes(uint(len(marshal))), marshal...))
 }
 
-func (s Storm) HandleRequest(c channel.IChannel, buffer []byte) {
+func (s Storm) HandleRequest(c interfaces.IChannel, buffer []byte) {
 	fmt.Println(string(buffer))
 	var m map[string]interface{}
 	json.Unmarshal(s.PayloadBody, &m)
@@ -68,7 +68,7 @@ func (s Storm) OperationGetCalendarResponse(payload []byte) {
 	json.Unmarshal(payload, res)
 }
 
-func (s Storm) OperationQueryFileListResponse(payload []byte, c channel.IChannel) {
+func (s Storm) OperationQueryFileListResponse(payload []byte, c interfaces.IChannel) {
 	var res *QueryFileListResponse
 	err := json.Unmarshal(payload, res)
 	if err == nil && res != nil && res.LASTRECORD == 0 {
@@ -121,7 +121,7 @@ type GetCalendarResponse struct {
 	ERRORCODE  int
 }
 
-func OperationQueryFileListRequest(c channel.IChannel, session string, startTime string, endTime string, chMask int) {
+func OperationQueryFileListRequest(c interfaces.IChannel, session string, startTime string, endTime string, chMask int) {
 	s := &Storm{
 		GeneralPackageHeader: GeneralPackageHeader{},
 		MODULE:               "STORM",

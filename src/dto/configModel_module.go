@@ -1,9 +1,9 @@
 package dto
 
 import (
-	"comm/channel"
 	"encoding/json"
 	"fmt"
+	"interfaces"
 )
 
 type ConfigModel struct {
@@ -71,7 +71,7 @@ type ConfigModuleResponse struct {
 	ERRORCODE  int
 }
 
-func (c ConfigModel) HandleRequest(channel channel.IChannel, buffer []byte) {
+func (c ConfigModel) HandleRequest(channel interfaces.IChannel, buffer []byte) {
 
 }
 

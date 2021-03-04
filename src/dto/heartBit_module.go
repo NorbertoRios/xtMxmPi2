@@ -2,9 +2,9 @@ package dto
 
 import (
 	bytes2 "bytes"
-	"comm/channel"
 	"encoding/json"
 	"fmt"
+	"interfaces"
 )
 
 type HeartBit struct {
@@ -38,7 +38,7 @@ func (h HeartBit) HandleRequest(channel channel.IChannel, buffer []byte) {
 	}
 }
 
-func funcName(channel channel.IChannel) {
+func funcName(channel interfaces.IChannel) {
 	request := `{
 		 "MODULE": "MEDIASTREAMMODEL",
 		 "SESSION": "2a741181-a3b3-422d-9e7b-a2afbab8ec09",

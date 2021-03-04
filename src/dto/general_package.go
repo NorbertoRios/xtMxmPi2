@@ -41,7 +41,7 @@ func (p *GeneralPackageHeader) FillGeneralPackageHeaderFromPackage(buffer []byte
 	return p
 }
 
-func ContainsAdditionalTCPSegment(buffer []byte) (bool, []byte, []byte) {
+func (p *GeneralPackageHeader) ContainsAdditionalTCPSegment(buffer []byte) (bool, []byte, []byte) {
 	if len(buffer) < 12 {
 		return false, nil, nil //partial header
 	}
