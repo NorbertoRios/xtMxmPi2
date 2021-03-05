@@ -69,7 +69,7 @@ func ParseVideoFrame(b []byte) *VideoFrame {
 	v := &VideoFrame{}
 	v.RawHeader = b[:12]
 	v.Header = ParseVideoFrameHeader(v.RawHeader)
-	start := 11 + v.Header.ExtendedLen
+	start := 12 + v.Header.ExtendedLen
 	end := 12 + v.Header.ExtendedLen + v.Header.FrameLen
 	if start < len(b) && end <= len(b) {
 		v.Data = b[start:end]
