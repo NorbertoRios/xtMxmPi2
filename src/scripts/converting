@@ -1,0 +1,1 @@
+ffmpeg  -ar 8000 -f alaw -i server_file_05.03__new_5_audio_1 -acodec pcm_alaw  -b:a 16k server_file_05.03__new_5_audio_1.au
