@@ -1,7 +1,9 @@
 ffmpeg  -ar 8000 -f alaw -i server_file_05.03__new_5_audio_1 -acodec pcm_alaw  -b:a 16k server_file_05.03__new_5_audio_1.au
+ffmpeg  -ar 8000 -f mulaw -i server_file_05.03__new_5_audio_1 -acodec pcm_mulaw  -b:a 16k server_file_05.03__new_5_audio_1.au
 
 //mkv valid conversion video + audio in one operation
 ffmpeg -r 20 -i server_file_05.03__new_5_video -f alaw -ar 8000  -i server_file_05.03__new_5_audio_1  -map 0:v -map 1:a -ab 16k -c copy server_file_4.mkv
 
 //same with mp4 and reencoding from pcm_alaw to aac audio codec (ffmpeg is not supporting pcm_alaw in mp4 container)
-ffmpeg -r 20 -i server_file_05.03__new_5_video -f alaw -ar 8000  -i server_file_05.03__new_5_audio_1  -map 0:v -map 1:a -ab 16k -c:v copy -c:a aac server_file_4.mkv
+ffmpeg -r 20 -i server_file_05.03__new_5_video -f alaw -ar 8000  -i server_file_05.03__new_5_audio_1  -map 0:v -map 1:a -ab 16k -c:v copy -c:a aac server_file_4.mp4
+ffmpeg -r 20 -i video -f mulaw -ar 8000  -i audio  -map 0:v -map 1:a -ab 16k -c:v copy -c:a aac server_file_4.mkv
