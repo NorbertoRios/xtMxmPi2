@@ -5,10 +5,11 @@ import (
 )
 
 type VideoFrame struct {
-	RawHeader []byte
-	Header    *VideoFrameHeader // 12 byte
-	Extension []byte            // <ExtendedLen> is total len of all ex. blocks
-	Data      []byte            // audio and video
+	RawHeader   []byte
+	Header      *VideoFrameHeader // 12 byte
+	Extension   []byte            // <ExtendedLen> is total len of all ex. blocks
+	Data        []byte            // audio and video
+	InfoHeaders []*InfoTypeHeader
 }
 
 type VideoFrameHeader struct { // 12 byte
@@ -73,7 +74,8 @@ func ParseVideoFrame(b []byte) *VideoFrame {
 	end := 12 + v.Header.ExtendedLen + v.Header.FrameLen
 	if start < len(b) && end <= len(b) {
 		v.Data = b[start:end]
-		v.Extension = b[11 : 12+v.Header.ExtendedLen]
+		v.Extension = b[12 : 12+v.Header.ExtendedLen]
+		v.InfoHeaders = parseInfoTypeHeader(v.Extension)
 	} else {
 		return nil
 	}
@@ -81,8 +83,32 @@ func ParseVideoFrame(b []byte) *VideoFrame {
 }
 
 type InfoTypeHeader struct { // 4 byte
-	infoType   int // 8 bit
-	infoLength int // 24 bit  // reverse order, counts this header itself
+	infoType    int    // 8 bit
+	infoLength  int    // 24 bit  // reverse order, counts this header itself
+	infoPayload []byte // pointer for payload data
+}
+
+type InfoTypeAudioInfo struct { //infoType 5 // 4 byte //ex. 22 04 f4 01
+	PayloadType byte //:4 //Audio encode type, 0:ADPCM, 1:G726-MEDIA-16K, 2:G711A, 3:G711U, 4:AMR
+	SoundMode   byte //:1 //audio channel mode, 0:mono 1:stereo
+	PlayAudio   byte //:1 //audio play flag, 0:not play, 1:Play
+	BitWidth    byte //:6 //Audio sampling accuracy: 8(8bit) 16(16bit)
+	SampleRate  uint //:18 //Sample rate 8000(8K) 16000(16K)
+	Reserve     byte //:2
+}
+
+func parseInfoTypeHeader(ex []byte) []*InfoTypeHeader {
+	headers := make([]*InfoTypeHeader, 0)
+	for ptr := 0; ptr < len(ex); {
+		head := &InfoTypeHeader{
+			infoType:   int(ex[ptr]),
+			infoLength: int(ex[ptr+3])<<16 + int(ex[ptr+2])<<8 + int(ex[ptr+1]),
+		}
+		head.infoPayload = ex[ptr+4 : head.infoLength]
+		ptr += head.infoLength
+		headers = append(headers, head)
+	}
+	return headers
 }
 
 const (
