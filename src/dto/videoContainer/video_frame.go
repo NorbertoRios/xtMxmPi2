@@ -83,9 +83,9 @@ func ParseVideoFrame(b []byte) *VideoFrame {
 }
 
 type InfoTypeHeader struct { // 4 byte
-	infoType    int    // 8 bit
-	infoLength  int    // 24 bit  // reverse order, counts this header itself
-	infoPayload []byte // pointer for payload data
+	InfoType    int    // 8 bit
+	InfoLength  int    // 24 bit  // reverse order, counts this header itself
+	InfoPayload []byte // pointer for payload data
 }
 
 type InfoTypeAudioInfo struct { //infoType 5 // 4 byte //ex. 22 04 f4 01
@@ -101,11 +101,11 @@ func parseInfoTypeHeader(ex []byte) []*InfoTypeHeader {
 	headers := make([]*InfoTypeHeader, 0)
 	for ptr := 0; ptr < len(ex); {
 		head := &InfoTypeHeader{
-			infoType:   int(ex[ptr]),
-			infoLength: int(ex[ptr+3])<<16 + int(ex[ptr+2])<<8 + int(ex[ptr+1]),
+			InfoType:   int(ex[ptr]),
+			InfoLength: int(ex[ptr+3])<<16 + int(ex[ptr+2])<<8 + int(ex[ptr+1]),
 		}
-		head.infoPayload = ex[ptr+4 : head.infoLength]
-		ptr += head.infoLength
+		head.InfoPayload = ex[ptr+4 : head.InfoLength]
+		ptr += head.InfoLength
 		headers = append(headers, head)
 	}
 	return headers

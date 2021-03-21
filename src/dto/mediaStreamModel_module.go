@@ -23,6 +23,8 @@ func (m MediaStreamModel) HandleRequest(c interfaces.IChannel, buffer []byte) {
 		m.handleRequestDownloadVideoResponse(c, buffer)
 	case "MEDIATASKSTART":
 		m.handleMediaTaskStartResponse(c, buffer)
+	case "MEDIATASKSTOP":
+		m.handleMediaTaskStopResponse(c, buffer)
 	}
 }
 
@@ -40,6 +42,10 @@ func (m MediaStreamModel) ParseDtoFromData(buffer []byte) interface{} {
 		var msr *MediaStreamModelMediaTaskStartResponseParameter
 		json.Unmarshal(marshalParam, msr)
 		result.PARAMETER = &msr
+	case "MEDIATASKSTOP":
+		var mts *MediaStreamModelMediaTaskStopResponseParameter
+		json.Unmarshal(marshalParam, mts)
+		result.PARAMETER = &mts
 	}
 	return result
 }
@@ -48,6 +54,10 @@ func (m MediaStreamModel) handleRequestDownloadVideoResponse(c interfaces.IChann
 
 }
 func (m MediaStreamModel) handleMediaTaskStartResponse(c interfaces.IChannel, buffer []byte) {
+
+}
+
+func (m MediaStreamModel) handleMediaTaskStopResponse(c interfaces.IChannel, buffer []byte) {
 
 }
 
@@ -113,4 +123,11 @@ type MediaStreamModelMediaTaskStartResponseParameter struct {
 	PT         int //payload type as in package header
 	SSRC       int //128
 	STREAMNAME string
+}
+
+//"OPERATION":"MEDIATASKSTOP"  ACK (callback)
+type MediaStreamModelMediaTaskStopResponseParameter struct {
+	MediaStreamModelMediaTaskStartResponseParameter
+	ERRORCAUSE string
+	ERRORCODE  int
 }

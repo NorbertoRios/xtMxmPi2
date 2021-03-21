@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"interfaces"
 	"os"
+	"strconv"
+	"time"
 )
 
 type VideoHandler struct {
@@ -14,6 +16,7 @@ type VideoHandler struct {
 	frameCounter    int
 	frameMap        map[int]int
 	containerBuffer *TSOBuffer
+	audioCodecId    int
 }
 
 type VideoHandlerModule struct {
@@ -39,6 +42,19 @@ func handleNormalizedPayload(c interfaces.IChannel, buffer []byte) {
 	frames := videoContainer.ParseIntegerFrames(buffer[:])
 	for _, fr := range frames {
 		if fr.Header.FrameType == videoContainer.Audio {
+			headers := fr.InfoHeaders
+			for _, h := range headers {
+				if h.InfoType == 5 {
+					pt := (h.InfoPayload[0] & 0xF0) >> 4
+					if int(pt) != videoHandler.audioCodecId {
+						if videoHandler.audioCodecId == -1 {
+							videoHandler.audioCodecId = int(pt)
+							continue
+						}
+						renewAudioCodec(videoHandler, int(pt))
+					}
+				}
+			}
 			videoHandler.audioFile.Write(fr.Data[4:])
 		}
 		if fr.Header.FrameType == videoContainer.H264I {
@@ -56,6 +72,11 @@ func handleNormalizedPayload(c interfaces.IChannel, buffer []byte) {
 			videoHandler.videoFile.Write(fr.Data)
 		}
 	}
+}
+
+func renewAudioCodec(vh *VideoHandler, codecId int) {
+	vh.audioFile = createFile("server_file_" + time.Now().String() + "_acodec_" + strconv.Itoa(codecId))
+	vh.audioCodecId = codecId
 }
 
 func (v VideoHandler) GetFrameMedian() int {
@@ -89,5 +110,6 @@ func createVideoHandler() *VideoHandler {
 		frameCounter:    0,
 		containerBuffer: &TSOBuffer{},
 		frameMap:        make(map[int]int),
+		audioCodecId:    -1,
 	}
 }
