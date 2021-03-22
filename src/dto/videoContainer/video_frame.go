@@ -97,6 +97,12 @@ type InfoTypeAudioInfo struct { //infoType 5 // 4 byte //ex. 22 04 f4 01
 	Reserve     byte //:2
 }
 
+type InfoTypeVideoInfo struct {
+	Width  int //:12
+	Height int //:12
+	FPS    int //:8
+}
+
 func parseInfoTypeHeader(ex []byte) []*InfoTypeHeader {
 	headers := make([]*InfoTypeHeader, 0)
 	for ptr := 0; ptr < len(ex); {
