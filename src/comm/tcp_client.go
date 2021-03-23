@@ -39,6 +39,7 @@ func (c *Client) SendBytes(message []byte) error {
 }
 
 func (c *Client) CloseConnection() {
+	c.VideoHandler.CloseFiles()
 	c.Connection.Close()
 }
 

@@ -12,14 +12,17 @@ import (
 )
 
 type VideoHandler struct {
-	videoFile       *os.File
-	audioFile       *os.File
-	rawFile         *os.File
-	frameCounter    int
-	frameMap        map[int]int
-	containerBuffer *TSOBuffer
-	audioCodecId    int
-	videoCodecId    int
+	videoFile        *os.File
+	audioFile        *os.File
+	rawFile          *os.File
+	frameCounter     int
+	frameMap         map[int]int
+	containerBuffer  *TSOBuffer
+	audioCodecId     int
+	videoCodecId     int
+	timeStart        time.Time
+	filePrefix       string
+	videoFileCounter int
 }
 
 type VideoHandlerModule struct {
@@ -61,16 +64,46 @@ func handleNormalizedPayload(c interfaces.IChannel, buffer []byte) {
 	}
 }
 
+func generateFilename(videoHandler *VideoHandler) string {
+	return videoHandler.timeStart.String() + "_" + videoHandler.filePrefix + "_part"
+}
+
 func processMJPEGFrame(videoHandler *VideoHandler, fr *videoContainer.VideoFrame) {
 
 }
 
 func process265IFrame(videoHandler *VideoHandler, fr *videoContainer.VideoFrame) {
+	if setVideoCodec(videoHandler, videoContainer.H265I) {
+		updateVideoFileAfterCodecChanged(videoHandler)
+	}
+	updateICounterMap(videoHandler)
+	videoHandler.videoFile.Write(fr.Data)
+}
 
+func updateVideoFileAfterCodecChanged(videoHandler *VideoHandler) {
+	videoHandler.videoFileCounter++
+	videoHandler.videoFile.Close()
+	videoHandler.videoFile = createFile(generateFilename(videoHandler) + strconv.Itoa(videoHandler.videoFileCounter) + ".video")
 }
 
 func process265PFrame(videoHandler *VideoHandler, fr *videoContainer.VideoFrame) {
+	videoHandler.frameCounter++
+	if setVideoCodec(videoHandler, videoContainer.H265P) {
+		updateVideoFileAfterCodecChanged(videoHandler)
+	}
+	videoHandler.videoFile.Write(fr.Data)
+}
 
+func (v *VideoHandler) CloseFiles() {
+	if v.audioFile != nil {
+		v.audioFile.Close()
+	}
+	if v.videoFile != nil {
+		v.videoFile.Close()
+	}
+	if v.rawFile != nil {
+		v.rawFile.Close()
+	}
 }
 
 //return true if value were updated
@@ -107,6 +140,11 @@ func process264PFrame(videoHandler *VideoHandler, fr *videoContainer.VideoFrame)
 }
 
 func process264IFrame(videoHandler *VideoHandler, fr *videoContainer.VideoFrame) {
+	updateICounterMap(videoHandler)
+	videoHandler.videoFile.Write(fr.Data)
+}
+
+func updateICounterMap(videoHandler *VideoHandler) {
 	fc := videoHandler.frameCounter
 	if _, found := videoHandler.frameMap[fc]; found {
 		videoHandler.frameMap[fc] = fc + 1
@@ -114,7 +152,6 @@ func process264IFrame(videoHandler *VideoHandler, fr *videoContainer.VideoFrame)
 		videoHandler.frameMap[fc] = 1
 	}
 	videoHandler.frameCounter = 1
-	videoHandler.videoFile.Write(fr.Data)
 }
 
 func processAudioFrame(fr *videoContainer.VideoFrame, videoHandler *VideoHandler) {
@@ -135,6 +172,9 @@ func processAudioFrame(fr *videoContainer.VideoFrame, videoHandler *VideoHandler
 }
 
 func renewAudioCodec(vh *VideoHandler, codecId int) {
+	if vh.audioFile != nil {
+		vh.audioFile.Close()
+	}
 	vh.audioFile = createFile("server_file_" + time.Now().String() + "_acodec_" + strconv.Itoa(codecId))
 	vh.audioCodecId = codecId
 }
@@ -173,14 +213,24 @@ func CreateFileRandomPrefix() string {
 }
 
 func createVideoHandler() *VideoHandler {
+	tNow := time.Now()
+	t := tNow.Format("2006-01-02T15:04:05Z07:00")
+	prefix := CreateFileRandomPrefix()
 	return &VideoHandler{
-		videoFile:       createFile(time.Now().Format("2006-01-02T15:04:05Z07:00") + "_" + CreateFileRandomPrefix() + ".video"),
-		audioFile:       createFile(time.Now().Format("2006-01-02T15:04:05Z07:00") + "_" + CreateFileRandomPrefix() + ".audio"),
-		rawFile:         createFile(time.Now().Format("2006-01-02T15:04:05Z07:00") + "_" + CreateFileRandomPrefix() + ".h264"),
-		frameCounter:    0,
-		containerBuffer: &TSOBuffer{},
-		frameMap:        make(map[int]int),
-		audioCodecId:    -1,
-		videoCodecId:    -1,
+		videoFile:        createFile(t + "_" + prefix + "_part0" + ".video"),
+		audioFile:        createFile(t + "_" + prefix + "_part0" + ".audio"),
+		rawFile:          createFile(t + "_" + prefix + ".h264"),
+		frameCounter:     0,
+		containerBuffer:  &TSOBuffer{},
+		frameMap:         make(map[int]int),
+		audioCodecId:     -1,
+		videoCodecId:     -1,
+		filePrefix:       prefix,
+		timeStart:        tNow,
+		videoFileCounter: 0,
 	}
+}
+
+func (v *VideoHandler) DownloadFinished() {
+
 }
