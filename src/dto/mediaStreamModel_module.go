@@ -75,10 +75,34 @@ func RequestFile(c interfaces.IChannel, streamName string, streamType int, recor
 			CHANNEL:    channel,
 			STARTTIME:  startTime,
 			ENDTIME:    endTime,
-			OFFSETFLAG: 1,
+			OFFSETFLAG: 0,
 			OFFSET:     0,
 			IPANDPORT:  config.VideoServerWANIP + ":" + strconv.Itoa(config.VideoServerPort),
 			SERIAL:     rand.Intn(0xffff),
+		},
+		SESSION:  c.GetCurrentSession(),
+		RESPONSE: nil,
+	}
+	header := GeneralPackageHeader{}
+	marshal, _ := json.Marshal(m)
+	headerBytes := header.toHeaderBytes(uint(len(marshal)))
+	bytes := append(headerBytes, marshal...)
+	PrintDebugPackageInfo(bytes)
+	c.SendBytes(bytes)
+}
+
+func ControlDownloadVideo(c interfaces.IChannel, streamName string, cmd int) {
+	m := &MediaStreamModel{
+		GeneralPackageHeader: GeneralPackageHeader{},
+		MODULE:               "MEDIASTREAMMODEL",
+		OPERATION:            "CONTROLDOWNLOADVIDEO",
+		PARAMETER: MediaStreamModelControlDownloadVideoParameter{
+			CSRC:       "",
+			PT:         0,
+			SSRC:       0,
+			STREAMNAME: streamName,
+			CMD:        cmd,
+			DT:         0,
 		},
 		SESSION:  c.GetCurrentSession(),
 		RESPONSE: nil,
@@ -114,6 +138,20 @@ type MediaStreamModelRequestDownloadVideoParameter struct {
 	OFFSET     int
 	IPANDPORT  string
 	SERIAL     int
+}
+
+type MediaStreamModelControlDownloadVideoParameter struct {
+	CSRC       string
+	PT         int //payload type as in package header
+	SSRC       int
+	STREAMNAME string
+	//Control the media task operation (0: stop, 1: restore download, 2: pause, 3: switch download mode.
+	//If issue this command, will immediately execute the new command, continue to download until the completion of the download task)
+	CMD int
+	//Download mode, the default is normal download.
+	//If this field does not exist, it is also normal download
+	//0: normal download
+	DT int
 }
 
 //"OPERATION":"MEDIATASKSTART"  ACK (callback)
