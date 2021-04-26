@@ -19,7 +19,7 @@ type HeartBitResponseError struct {
 	ERRORCAUSE string
 }
 
-func (h HeartBit) HandleRequest(channel channel.IChannel, buffer []byte) {
+func (h HeartBit) HandleRequest(channel interfaces.IChannel, buffer []byte) {
 	if IsBinaryHeartBit(buffer) {
 		fmt.Println("got keep_alive")
 	} else {
