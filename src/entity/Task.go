@@ -12,6 +12,7 @@ type Tasks struct {
 	Stream     int
 	SubStream  int
 	Screenshot int
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	CreatedAt  time.Time `gorm:"column:created_time"`
+	UpdatedAt  time.Time `gorm:"column:updated_time"`
+	DeletedAt  time.Time `gorm:"column:deleted_time"`
 }

@@ -15,7 +15,7 @@ create table if not exists tasks
 	id bigserial not null
 		constraint tasks_pk
 			primary key,
-	"deviceId" bigint not null
+	"device_id" bigint not null
 		constraint tasks_devices_id_fk
 			references devices,
 	status varchar(24) default 'created'::character varying not null,
@@ -26,7 +26,8 @@ create table if not exists tasks
 	sub_stream integer default 0 not null,
 	screenshot integer default 0 not null,
 	created_time timestamp default now() not null,
-	deleted_time timestamp
+	deleted_time timestamp,
+	updated_time timestamp default now() not null
 );
 
 

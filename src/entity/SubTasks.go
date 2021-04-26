@@ -14,7 +14,7 @@ type SubTasks struct {
 	DeviceId  int64
 	StartTime time.Time
 	EndTime   time.Time
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time      `gorm:"column:created_time"`
+	UpdatedAt time.Time      `gorm:"column:updated_time"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
