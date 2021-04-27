@@ -1,10 +1,10 @@
 package httpDto
 
 type Task struct {
-	StartTime int64    `json:"startTime,omitempty"`
-	EndTime   int64    `json:"endTime,omitempty"`
-	Dsno      string   `json:"dsno,omitempty"`
-	Channels  Channels `json:"channels,omitempty"`
+	StartTime int64     `json:"startTime,omitempty"`
+	EndTime   int64     `json:"endTime,omitempty"`
+	Dsno      string    `json:"dsno,omitempty"`
+	Channels  *Channels `json:"channels,omitempty"`
 }
 
 type Channels struct {

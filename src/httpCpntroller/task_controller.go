@@ -23,6 +23,9 @@ func (h TaskHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 400)
 			return
 		}
+		if !validateTask(task) {
+			w.WriteHeader(400)
+		}
 		str := getTypeFromTask("stream", task)
 		sstr := getTypeFromTask("substream", task)
 		scr := getTypeFromTask("screenshot", task)
@@ -39,6 +42,19 @@ func (h TaskHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(500)
 		}
 	}
+}
+
+func validateTask(t httpDto.Task) bool {
+	if t.StartTime < 1556342281 || t.EndTime < 1556342281 || t.StartTime > 4112486281 || t.EndTime > 4112486281 {
+		return false
+	}
+	if len(t.Dsno) < 3 {
+		return false
+	}
+	if t.Channels == nil || (t.Channels.Adas == nil && t.Channels.Dsm == nil && t.Channels.Ip == nil) {
+		return false
+	}
+	return true
 }
 
 //1,2,3 adas,dsm,ip   bits
