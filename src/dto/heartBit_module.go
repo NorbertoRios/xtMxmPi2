@@ -3,7 +3,7 @@ package dto
 import (
 	"encoding/json"
 	"fmt"
-	"interfaces"
+	"streamax-go/interfaces"
 )
 
 type HeartBit struct {

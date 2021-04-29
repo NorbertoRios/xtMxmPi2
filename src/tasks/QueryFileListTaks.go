@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	"dto"
+	"streamax-go/dto"
 )
 
 type OperationQueryFileListRequestTask struct {

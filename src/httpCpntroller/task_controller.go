@@ -3,9 +3,9 @@ package httpCpntroller
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"httpDto"
 	"net/http"
-	"service"
+	"streamax-go/httpDto"
+	"streamax-go/service"
 	"time"
 )
 

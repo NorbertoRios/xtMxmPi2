@@ -1,7 +1,7 @@
 package videoContainer
 
 import (
-	"interfaces"
+	"streamax-go/interfaces"
 )
 
 type VideoFrame struct {

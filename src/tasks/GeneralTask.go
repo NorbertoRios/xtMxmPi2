@@ -1,6 +1,6 @@
 package tasks
 
-import "interfaces"
+import "streamax-go/interfaces"
 
 type GeneralTask struct {
 	Device    interfaces.Device

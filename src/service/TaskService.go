@@ -1,8 +1,8 @@
 package service
 
 import (
-	"entity"
 	"gorm.io/gorm"
+	"streamax-go/entity"
 	"time"
 )
 

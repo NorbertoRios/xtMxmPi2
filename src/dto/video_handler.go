@@ -2,12 +2,12 @@ package dto
 
 import (
 	"crypto/rand"
-	"dto/videoContainer"
 	"fmt"
-	"interfaces"
 	"log"
 	"os"
 	"strconv"
+	"streamax-go/dto/videoContainer"
+	"streamax-go/interfaces"
 	"time"
 )
 

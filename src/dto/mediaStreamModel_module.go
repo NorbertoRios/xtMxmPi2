@@ -1,11 +1,11 @@
 package dto
 
 import (
-	"config"
 	"encoding/json"
-	"interfaces"
 	"math/rand"
 	"strconv"
+	"streamax-go/config"
+	"streamax-go/interfaces"
 )
 
 type MediaStreamModel struct {

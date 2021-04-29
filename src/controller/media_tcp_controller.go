@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"dto"
 	"fmt"
-	"interfaces"
+	"streamax-go/dto"
+	"streamax-go/interfaces"
 	"strings"
 	"sync"
 )

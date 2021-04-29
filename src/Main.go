@@ -1,9 +1,9 @@
 package main
 
 import (
-	"comm"
-	"config"
-	"service"
+	"streamax-go/comm"
+	"streamax-go/config"
+	"streamax-go/service"
 )
 
 func main() {

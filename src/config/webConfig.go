@@ -3,9 +3,9 @@ package config
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"httpCpntroller"
 	"net/http"
 	"strconv"
+	"streamax-go/httpCpntroller"
 	"time"
 )
 

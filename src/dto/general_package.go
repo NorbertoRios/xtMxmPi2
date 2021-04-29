@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"interfaces"
+	"streamax-go/interfaces"
 )
 
 type GeneralPackageHeader struct {

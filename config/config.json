@@ -10,7 +10,7 @@
   "DBHost": "localhost",
   "DBPort": "5432",
   "DBScheme": "public",
-  "DBConnectionString": "host=localhost user=posi password=posi dbname=posi port=5432 sslmode=disable TimeZone=GMT",
+  "DBConnectionString": "host=localhost user=posi password=posi dbname=posi port=5432 sslmode=enable TimeZone=GMT",
   "DBSetMaxIdleConns": 10,
   "DBSetMaxOpenConns": 100
 }
