@@ -3,16 +3,14 @@ package main
 import (
 	"comm"
 	"config"
-	"log"
-	"net/http"
 	"service"
 )
 
 func main() {
 	c := config.OpenDBConnection()
 	service.DB = c
-	server := comm.NewTCPServer("", config.MainPort)
-	serverVideo := comm.NewTCPServer("", config.VideoServerPort)
+	server := comm.NewTCPServer("", config.GetConfig().MainPort)
+	serverVideo := comm.NewTCPServer("", config.GetConfig().VideoServerPort)
 	go serverVideo.Listen()
 	go listenHttp()
 	server.Listen()
@@ -20,9 +18,5 @@ func main() {
 }
 
 func listenHttp() {
-	muxer := config.CreateHttpMuxer()
-	err := http.ListenAndServe(":8082", muxer)
-	if err != nil {
-		log.Fatal(err)
-	}
+	config.CreateGinServer()
 }

@@ -77,7 +77,7 @@ func RequestFile(c interfaces.IChannel, streamName string, streamType int, recor
 			ENDTIME:    endTime,
 			OFFSETFLAG: 0,
 			OFFSET:     0,
-			IPANDPORT:  config.VideoServerWANIP + ":" + strconv.Itoa(config.VideoServerPort),
+			IPANDPORT:  config.GetConfig().VideoServerWANIP + ":" + strconv.Itoa(config.GetConfig().VideoServerPort),
 			SERIAL:     rand.Intn(0xffff),
 		},
 		SESSION:  c.GetCurrentSession(),

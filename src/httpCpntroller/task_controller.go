@@ -2,87 +2,73 @@ package httpCpntroller
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"httpDto"
 	"net/http"
 	"service"
 	"time"
 )
 
-type TaskHandler struct{}
+type HttpTaskController struct{}
 
-func (h TaskHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		//request.Body.Read()
-		var task httpDto.Task
-		if r.Body == nil {
-			http.Error(w, "Empty body", 400)
-			return
-		}
-		err := json.NewDecoder(r.Body).Decode(&task)
-		if err != nil {
-			http.Error(w, err.Error(), 400)
-			return
-		}
-		if !validateTask(task) {
-			w.WriteHeader(400)
-		}
-		str := getTypeFromTask("stream", task)
-		sstr := getTypeFromTask("substream", task)
-		scr := getTypeFromTask("screenshot", task)
-		err = service.CreateTask(
-			task.Dsno,
-			time.Unix(0, task.StartTime*1000000).UTC(),
-			time.Unix(0, task.EndTime*1000000).UTC(),
-			str|sstr|scr,
-			str,
-			sstr,
-			scr,
-		)
-		if err != nil {
-			w.WriteHeader(500)
-		}
+func (h HttpTaskController) CreateTaskPOST(c *gin.Context) {
+	var task httpDto.Task
+	if c.Request.Body == nil {
+		c.JSON(http.StatusBadRequest, "")
+		return
 	}
-}
-
-func validateTask(t httpDto.Task) bool {
-	if t.StartTime < 1556342281 || t.EndTime < 1556342281 || t.StartTime > 4112486281 || t.EndTime > 4112486281 {
-		return false
+	err := json.NewDecoder(c.Request.Body).Decode(&task)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "")
+		return
 	}
-	if len(t.Dsno) < 3 {
-		return false
+	if !task.ValidateTask() {
+		c.JSON(http.StatusBadRequest, "")
 	}
-	if t.Channels == nil || (t.Channels.Adas == nil && t.Channels.Dsm == nil && t.Channels.Ip == nil) {
-		return false
+	str := getTypeFromTask("stream", task)
+	sstr := getTypeFromTask("substream", task)
+	scr := getTypeFromTask("screenshot", task)
+	id, qat, tErr := service.CreateTask(
+		task.Dsno,
+		time.Unix(task.StartTime, 0).UTC(),
+		time.Unix(task.EndTime, 0).UTC(),
+		str|sstr|scr,
+		str,
+		sstr,
+		scr,
+	)
+	if tErr != nil {
+		c.JSON(http.StatusInternalServerError, "")
+		return
 	}
-	return true
+	resp := &httpDto.TaskResponse{
+		Id:       id,
+		QueuedAt: qat,
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
 //1,2,3 adas,dsm,ip   bits
 //0 empty
 func getTypeFromTask(s string, t httpDto.Task) int {
-	var res int = 0
+	var res = 0
 	if t.Channels.Ip != nil {
-		types := t.Channels.Ip.FileTypes
-		for i := 0; i < len(types); i++ {
-			if types[i] == s {
-				res = service.PutFlagToInt(3, res)
-			}
-		}
+		res = funcName(s, t.Channels.Ip.FileTypes, res, 3)
 	}
 	if t.Channels.Dsm != nil {
-		typesDsm := t.Channels.Dsm.FileTypes
-		for i := 0; i < len(typesDsm); i++ {
-			if typesDsm[i] == s {
-				res = service.PutFlagToInt(2, res)
-			}
-		}
+		res = funcName(s, t.Channels.Dsm.FileTypes, res, 2)
 	}
 	if t.Channels.Adas != nil {
-		typesAdas := t.Channels.Adas.FileTypes
-		for i := 0; i < len(typesAdas); i++ {
-			if typesAdas[i] == s {
-				res = service.PutFlagToInt(1, res)
-			}
+		res = funcName(s, t.Channels.Adas.FileTypes, res, 1)
+	}
+	return res
+}
+
+func funcName(s string, ar []string, res int, ch int) int {
+	typesAdas := ar
+	for i := 0; i < len(typesAdas); i++ {
+		if typesAdas[i] == s {
+			res = service.PutFlagToInt(ch, res)
 		}
 	}
 	return res

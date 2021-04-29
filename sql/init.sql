@@ -1,68 +1,73 @@
-create table if not exists devices
+-- devices: table
+CREATE TABLE `devices`
 (
-	id bigserial not null
-		constraint devices_pk
-			primary key,
-	dsno varchar(20) not null
-);
+    `id`   bigint(20)  NOT NULL AUTO_INCREMENT,
+    `dsno` varchar(24) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `devices_id_uindex` (`id`),
+    UNIQUE KEY `devices_dsno_uindex` (`dsno`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = latin1;
 
-
-create unique index if not exists devices_dsno_uindex
-	on devices (dsno);
-
-create table if not exists tasks
+-- sub_tasks: table
+CREATE TABLE `sub_tasks`
 (
-	id bigserial not null
-		constraint tasks_pk
-			primary key,
-	"device_id" bigint not null
-		constraint tasks_devices_id_fk
-			references devices,
-	status varchar(24) default 'created'::character varying not null,
-	start_time timestamp not null,
-	end_time timestamp not null,
-	channels integer default 0 not null,
-	stream integer default 0 not null,
-	sub_stream integer default 0 not null,
-	screenshot integer default 0 not null,
-	created_time timestamp default now() not null,
-	deleted_time timestamp,
-	updated_time timestamp default now() not null
-);
+    `id`           bigint(20)  NOT NULL AUTO_INCREMENT,
+    `task_id`      bigint(20)  NOT NULL,
+    `channel`      int(11)     NOT NULL,
+    `data_type`    int(11)     NOT NULL,
+    `status`       varchar(24) NOT NULL,
+    `device_id`    bigint(20)  NOT NULL,
+    `start_time`   timestamp   NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+    `end_time`     timestamp   NULL     DEFAULT NULL,
+    `created_time` timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `deleted_time` timestamp   NULL     DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `sub_tasks_id_uindex` (`id`),
+    KEY `sub_tasks_tasks_id_fk` (`task_id`),
+    CONSTRAINT `sub_tasks_tasks_id_fk` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = latin1;
 
+-- No native definition for element: sub_tasks_tasks_id_fk (index)
 
-create table if not exists sub_tasks
+-- task_queue: table
+CREATE TABLE `task_queue`
 (
-	id bigserial not null
-		constraint sub_tasks_pk
-			primary key,
-	task_id bigint not null
-		constraint sub_tasks_tasks_id_fk
-			references tasks,
-	channel integer default 0 not null,
-	data_type integer default 0 not null,
-	status varchar(24) default 'created'::character varying not null,
-	device_id bigint not null
-		constraint sub_tasks_devices_id_fk
-			references devices,
-	start_time timestamp,
-	end_time timestamp,
-	created_time timestamp default now() not null,
-	deleted_time timestamp
-);
+    `task_id`      bigint(20) NOT NULL,
+    `device_id`    bigint(20) NOT NULL,
+    `created_time` timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`task_id`, `device_id`),
+    UNIQUE KEY `task_queue_task_id_device_id_uindex` (`task_id`, `device_id`),
+    KEY `task_queue_devices_id_fk` (`device_id`),
+    CONSTRAINT `task_queue_devices_id_fk` FOREIGN KEY (`device_id`) REFERENCES `devices` (`id`),
+    CONSTRAINT `task_queue_tasks_id_fk` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = latin1;
 
+-- No native definition for element: task_queue_devices_id_fk (index)
 
-create table if not exists task_queue
+-- tasks: table
+CREATE TABLE `tasks`
 (
-	subtask_id bigint not null
-		constraint task_queue_sub_tasks_id_fk
-			references sub_tasks,
-	device_id bigint not null
-		constraint task_queue_devices_id_fk
-			references devices,
-	created_time timestamp default now() not null,
-	constraint task_queue_pk
-		primary key (subtask_id, device_id)
-);
+    `id`           bigint(20)  NOT NULL AUTO_INCREMENT,
+    `device_id`    bigint(20)  NOT NULL,
+    `status`       varchar(24) NOT NULL DEFAULT 'CREATED',
+    `start_time`   timestamp   NULL     DEFAULT NULL,
+    `end_time`     timestamp   NULL     DEFAULT NULL,
+    `channels`     int(11)     NOT NULL,
+    `stream`       int(11)     NOT NULL,
+    `sub_stream`   int(11)     NOT NULL,
+    `screenshot`   int(11)     NOT NULL,
+    `created_time` timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `deleted_time` timestamp   NULL     DEFAULT NULL,
+    `updated_time` timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `tasks_id_uindex` (`id`),
+    KEY `tasks_devices_id_fk` (`device_id`),
+    CONSTRAINT `tasks_devices_id_fk` FOREIGN KEY (`device_id`) REFERENCES `devices` (`id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = latin1;
 
+-- No native definition for element: tasks_devices_id_fk (index)
 

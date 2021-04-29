@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -12,9 +11,9 @@ type SubTasks struct {
 	DataType  int
 	Status    string
 	DeviceId  int64
-	StartTime time.Time
-	EndTime   time.Time
-	CreatedAt time.Time      `gorm:"column:created_time"`
-	UpdatedAt time.Time      `gorm:"column:updated_time"`
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	StartTime *time.Time
+	EndTime   *time.Time
+	CreatedAt *time.Time `gorm:"column:created_time"`
+	UpdatedAt *time.Time `gorm:"column:updated_time"`
+	DeletedAt *time.Time `gorm:"column:deleted_time"`
 }
