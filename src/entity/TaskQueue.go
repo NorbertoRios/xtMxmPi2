@@ -7,3 +7,7 @@ type TaskQueue struct {
 	DeviceId  int64      `gorm:"primaryKey;autoIncrement:false"`
 	CreatedAt *time.Time `gorm:"column:created_time"`
 }
+
+func (tq TaskQueue) TableName() string {
+	return "task_queue"
+}
