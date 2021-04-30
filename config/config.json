@@ -4,13 +4,15 @@
   "WebServerPort": 8082,
   "MainWANIP": "192.168.88.253",
   "VideoServerWANIP": "192.168.88.253",
-  "DBUser": "posi",
-  "DBPassword": "posi",
-  "DBName": "posi",
-  "DBHost": "localhost",
-  "DBPort": "5432",
-  "DBScheme": "public",
-  "DBConnectionString": "root:root@tcp(127.0.0.1:3306)/posi?charset=utf8mb4&parseTime=True&loc=Local",
-  "DBSetMaxIdleConns": 10,
-  "DBSetMaxOpenConns": 100
+  "DB": {
+    "DBUser": "posi",
+    "DBPassword": "posi",
+    "DBName": "posi",
+    "DBHost": "localhost",
+    "DBPort": "5432",
+    "DBScheme": "public",
+    "DBConnectionString": "root:root@tcp(127.0.0.1:3306)/posi?charset=utf8mb4&parseTime=True&loc=Local",
+    "DBSetMaxIdleConns": 10,
+    "DBSetMaxOpenConns": 100
+  }
 }

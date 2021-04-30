@@ -18,5 +18,6 @@ func main() {
 }
 
 func listenHttp() {
-	config.CreateGinServer()
+	gs := &comm.GinServer{}
+	gs.RunGinServer()
 }

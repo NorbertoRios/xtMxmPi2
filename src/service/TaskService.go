@@ -3,10 +3,11 @@ package service
 import (
 	"gorm.io/gorm"
 	"streamax-go/entity"
+	"streamax-go/httpDto"
 	"time"
 )
 
-func CreateTask(deviceDsno string, startTime time.Time, endTime time.Time, channels int, stream int, subStream int, screenshot int) (int64, int, error) {
+func CreateTask(deviceDsno string, startTime time.Time, endTime time.Time, channels int, stream int, subStream int, screenshot int) (httpDto.TaskResponse, error) {
 	var dev *entity.Devices
 	tx := DB.Begin()
 	defer RecoverTX(tx)
@@ -35,30 +36,18 @@ func CreateTask(deviceDsno string, startTime time.Time, endTime time.Time, chann
 		DeviceId:  dev.ID,
 		CreatedAt: utcP,
 	})
-	var taskQ = make([]entity.TaskQueue, 0)
-	err = tx.Where("device_id = ?", dev.ID).Order("created_time").Find(taskQ).Error
+	var count int64
+	err = tx.Table("task_queue").
+		Where("device_id = ?", dev.ID).
+		Order("created_time").
+		Count(&count).
+		Error
 	if err != nil {
 		tx.Rollback()
-		return 0, 0, err
+		return httpDto.TaskResponse{}, err
 	}
-	qPos := 0
-	if len(taskQ) > 0 {
-		for i := 0; i < len(taskQ); i++ {
-			if task.ID == taskQ[i].TaskId {
-				qPos = i
-			}
-		}
-	}
-	return task.ID, qPos, tx.Commit().Error
-}
-
-func PutFlagToInt(flagPos int, val int) int {
-	var argument int = 1
-	if flagPos < 1 {
-		return val
-	}
-	if flagPos > 1 {
-		argument = argument << (flagPos - 1)
-	}
-	return val | argument
+	return httpDto.TaskResponse{
+		Id:       task.ID,
+		QueuedAt: count,
+	}, tx.Commit().Error
 }

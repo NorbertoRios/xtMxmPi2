@@ -1,73 +1,73 @@
--- devices: table
-CREATE TABLE `devices`
+create table devices
 (
-    `id`   bigint(20)  NOT NULL AUTO_INCREMENT,
-    `dsno` varchar(24) NOT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `devices_id_uindex` (`id`),
-    UNIQUE KEY `devices_dsno_uindex` (`dsno`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = latin1;
+    id   bigint auto_increment,
+    dsno varchar(24) not null,
+    constraint devices_dsno_uindex
+        unique (dsno),
+    constraint devices_id_uindex
+        unique (id)
+);
 
--- sub_tasks: table
-CREATE TABLE `sub_tasks`
+alter table devices
+    add primary key (id);
+
+create table tasks
 (
-    `id`           bigint(20)  NOT NULL AUTO_INCREMENT,
-    `task_id`      bigint(20)  NOT NULL,
-    `channel`      int(11)     NOT NULL,
-    `data_type`    int(11)     NOT NULL,
-    `status`       varchar(24) NOT NULL,
-    `device_id`    bigint(20)  NOT NULL,
-    `start_time`   timestamp   NOT NULL ON UPDATE CURRENT_TIMESTAMP,
-    `end_time`     timestamp   NULL     DEFAULT NULL,
-    `created_time` timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `deleted_time` timestamp   NULL     DEFAULT NULL,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `sub_tasks_id_uindex` (`id`),
-    KEY `sub_tasks_tasks_id_fk` (`task_id`),
-    CONSTRAINT `sub_tasks_tasks_id_fk` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = latin1;
+    id           bigint auto_increment,
+    device_id    bigint                                not null,
+    status       varchar(24) default 'CREATED'         not null,
+    start_time   timestamp                             null,
+    end_time     timestamp                             null,
+    channels     int                                   not null,
+    stream       int                                   not null,
+    sub_stream   int                                   not null,
+    screenshot   int                                   not null,
+    created_time timestamp   default CURRENT_TIMESTAMP not null,
+    deleted_time timestamp                             null,
+    updated_time timestamp   default CURRENT_TIMESTAMP not null,
+    constraint tasks_id_uindex
+        unique (id),
+    constraint tasks_devices_id_fk
+        foreign key (device_id) references devices (id)
+);
 
--- No native definition for element: sub_tasks_tasks_id_fk (index)
+alter table tasks
+    add primary key (id);
 
--- task_queue: table
-CREATE TABLE `task_queue`
+create table sub_tasks
 (
-    `task_id`      bigint(20) NOT NULL,
-    `device_id`    bigint(20) NOT NULL,
-    `created_time` timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`task_id`, `device_id`),
-    UNIQUE KEY `task_queue_task_id_device_id_uindex` (`task_id`, `device_id`),
-    KEY `task_queue_devices_id_fk` (`device_id`),
-    CONSTRAINT `task_queue_devices_id_fk` FOREIGN KEY (`device_id`) REFERENCES `devices` (`id`),
-    CONSTRAINT `task_queue_tasks_id_fk` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = latin1;
+    id           bigint auto_increment,
+    task_id      bigint                              not null,
+    channel      int                                 not null,
+    data_type    int                                 not null,
+    status       varchar(24)                         not null,
+    device_id    bigint                              not null,
+    start_time   timestamp                           null,
+    end_time     timestamp                           null,
+    created_time timestamp default CURRENT_TIMESTAMP not null,
+    deleted_time timestamp                           null,
+    constraint sub_tasks_id_uindex
+        unique (id),
+    constraint sub_tasks_tasks_id_fk
+        foreign key (task_id) references tasks (id)
+);
 
--- No native definition for element: task_queue_devices_id_fk (index)
+alter table sub_tasks
+    add primary key (id);
 
--- tasks: table
-CREATE TABLE `tasks`
+create table task_queue
 (
-    `id`           bigint(20)  NOT NULL AUTO_INCREMENT,
-    `device_id`    bigint(20)  NOT NULL,
-    `status`       varchar(24) NOT NULL DEFAULT 'CREATED',
-    `start_time`   timestamp   NULL     DEFAULT NULL,
-    `end_time`     timestamp   NULL     DEFAULT NULL,
-    `channels`     int(11)     NOT NULL,
-    `stream`       int(11)     NOT NULL,
-    `sub_stream`   int(11)     NOT NULL,
-    `screenshot`   int(11)     NOT NULL,
-    `created_time` timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `deleted_time` timestamp   NULL     DEFAULT NULL,
-    `updated_time` timestamp   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `tasks_id_uindex` (`id`),
-    KEY `tasks_devices_id_fk` (`device_id`),
-    CONSTRAINT `tasks_devices_id_fk` FOREIGN KEY (`device_id`) REFERENCES `devices` (`id`)
-) ENGINE = InnoDB
-  DEFAULT CHARSET = latin1;
+    task_id      bigint                              not null,
+    device_id    bigint                              not null,
+    created_time timestamp default CURRENT_TIMESTAMP not null,
+    constraint task_queue_task_id_device_id_uindex
+        unique (task_id, device_id),
+    constraint task_queue_devices_id_fk
+        foreign key (device_id) references devices (id),
+    constraint task_queue_tasks_id_fk
+        foreign key (task_id) references tasks (id)
+);
 
--- No native definition for element: tasks_devices_id_fk (index)
+alter table task_queue
+    add primary key (task_id, device_id);
 

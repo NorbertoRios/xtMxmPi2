@@ -9,7 +9,7 @@ import (
 )
 
 func OpenDBConnection() *gorm.DB {
-	db, err := gorm.Open(mysql.Open(GetConfig().DBConnectionString), &gorm.Config{
+	db, err := gorm.Open(mysql.Open(GetConfig().DB.DBConnectionString), &gorm.Config{
 		SkipDefaultTransaction: true,
 		Logger:                 logger.Default.LogMode(logger.Info),
 	})
@@ -18,9 +18,9 @@ func OpenDBConnection() *gorm.DB {
 	}
 	sqlDB, _ := db.DB()
 	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
-	sqlDB.SetMaxIdleConns(GetConfig().DBSetMaxIdleConns)
+	sqlDB.SetMaxIdleConns(GetConfig().DB.DBSetMaxIdleConns)
 	// SetMaxOpenConns sets the maximum number of open connections to the database.
-	sqlDB.SetMaxOpenConns(GetConfig().DBSetMaxOpenConns)
+	sqlDB.SetMaxOpenConns(GetConfig().DB.DBSetMaxOpenConns)
 	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	return db

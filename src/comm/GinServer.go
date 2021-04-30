@@ -1,18 +1,22 @@
-package config
+package comm
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"streamax-go/config"
 	"streamax-go/httpCpntroller"
 	"time"
 )
 
-func CreateGinServer() {
+type GinServer struct {
+}
+
+func (gs GinServer) RunGinServer() {
 	router := gin.Default()
 	s := &http.Server{
-		Addr:           ":" + strconv.Itoa(GetConfig().WebServerPort),
+		Addr:           ":" + strconv.Itoa(config.GetConfig().WebServerPort),
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
