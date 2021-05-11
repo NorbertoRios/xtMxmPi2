@@ -30,6 +30,7 @@ func (h HttpTaskController) CreateTaskPOST(c *gin.Context) {
 	substreamBits := task.GetTypeFromTask("substream")
 	screenshotBits := task.GetTypeFromTask("screenshot")
 	taskResponse, tErr := service.CreateTask(
+		&task,
 		task.Dsno,
 		time.Unix(task.StartTime, 0).UTC(),
 		time.Unix(task.EndTime, 0).UTC(),
