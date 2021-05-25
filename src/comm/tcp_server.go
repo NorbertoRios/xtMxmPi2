@@ -6,6 +6,7 @@ import (
 	"net"
 	"streamax-go/controller"
 	"streamax-go/interfaces"
+	"streamax-go/scontext"
 	"time"
 )
 
@@ -44,7 +45,7 @@ func NewTCPServer(host string, port int) *TCPServer {
 	}
 	ServerCounters.AddFloat("Transmitted", 0)
 	ServerCounters.AddFloat("Received", 0)
-	DeviceChannelMap = make(map[string]*interfaces.IChannel)
+	scontext.DeviceChannelMap = make(map[string]*interfaces.IChannel)
 	server.setOnNewClient(func(c *Client) {})
 	controller.InitModuleMap()
 	return server

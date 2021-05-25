@@ -41,8 +41,8 @@ type IChannel interface {
 	TransmittedBytes() int64
 	GetPageBuffer() *interface{}
 	SetPageBuffer(*interface{})
-	GetDevice() *Device
-	SetDevice(*Device)
+	GetDSNO() string
+	SetDSNO(string)
 	GetCurrentSession() string
 	SetCurrentSession(s string)
 	SetVideoHandler(vh interface{})

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"streamax-go/interfaces"
+	"streamax-go/scontext"
 )
 
 type CertificateModule struct {
@@ -47,7 +48,7 @@ func (d *CertificateModule) handleOperationConnect(channel interfaces.IChannel) 
 		d.checkDeviceIdentity(channel, cp.DSNO)
 	}
 	d.checkDeviceSession(channel, d.SESSION)
-	task := GetFirstByDeviceAndResponseType(channel.GetDevice(), CertificateModule{})
+	task := GetFirstByDeviceAndResponseType(&CameraDevice{Id: channel.GetDSNO()}, CertificateModule{})
 	if task != nil {
 		task.ProcessResponse(d)
 	}
@@ -76,11 +77,11 @@ func (d CertificateModule) ParseDtoFromData(buffer []byte) interface{} {
 }
 
 func (d CertificateModule) checkDeviceIdentity(channel interfaces.IChannel, deviceId string) {
-	if channel.GetDevice() == nil {
+	if channel.GetDSNO() == "" {
 		var id interfaces.Device = CameraDevice{Id: deviceId}
 		_, loaded := DevicesQHolder.LoadOrStore(id, QueueHolder{Q: list.New()})
 		if loaded {
-			channel.SetDevice(&id)
+			channel.SetDSNO(deviceId)
 			//var q = store.(QueueHolder).Q
 			fmt.Printf("existing device identity: %v", deviceId)
 		} else {
@@ -95,11 +96,13 @@ func (d CertificateModule) checkDeviceSession(c interfaces.IChannel, session str
 			c.SetCurrentSession(session)
 		}
 	}
-	//dd := c.GetDevice()
-	//if comm.DeviceChannelMap[c.GetDevice()]
+	mch := scontext.DeviceChannelMap[c.GetDSNO()]
+	if mch == nil {
+		scontext.DeviceChannelMap[c.GetDSNO()] = &c
+	}
 }
 
-func GetFirstByDeviceAndResponseType(device *interfaces.Device, rType interface{}) interfaces.Task {
+func GetFirstByDeviceAndResponseType(device *CameraDevice, rType interface{}) interfaces.Task {
 	if device == nil {
 		return nil
 	}

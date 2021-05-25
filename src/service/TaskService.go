@@ -4,7 +4,6 @@ import (
 	"github.com/nu7hatch/gouuid"
 	"gorm.io/gorm"
 	"strconv"
-	"streamax-go/comm"
 	"streamax-go/dto"
 	"streamax-go/entity"
 	"streamax-go/httpDto"
@@ -106,9 +105,10 @@ func SetSubTaskToProgress(st entity.SubTasks, task entity.Tasks, tx *gorm.DB) (*
 func ProcessSubTask(st entity.SubTasks, task entity.Tasks, tx *gorm.DB) (*entity.SubTaskQueue, error) {
 	var device entity.Devices
 	tx.First(device, "id = ?", st.DeviceId)
-	channel := comm.DeviceChannelMap[device.Dsno]
+	//channel := scontext.DeviceChannelMap[device.Dsno]
 	//dto.RequestFile(*channel, "58895_video", 3,
 	//	"0-0-101", 1, "20210525075506", "20210525081417")
+	return nil, nil
 }
 
 func processStream(c interfaces.IChannel, st entity.SubTasks) {
@@ -117,4 +117,8 @@ func processStream(c interfaces.IChannel, st entity.SubTasks) {
 		strconv.FormatInt(st.StartTime.Unix(), 10),
 		strconv.FormatInt(st.EndTime.Unix(), 10),
 		st.Channel)
+}
+
+func HandleFileListResponse(resp interface{}, c interfaces.IChannel) {
+	//resp.()
 }
