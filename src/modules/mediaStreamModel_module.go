@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 	"streamax-go/config"
+	"streamax-go/dto"
 	"streamax-go/interfaces"
 )
 
@@ -35,15 +36,15 @@ func (m MediaStreamModel) ParseDtoFromData(buffer []byte) interface{} {
 	marshalParam, _ := json.Marshal(result.PARAMETER)
 	switch m.OPERATION {
 	case "REQUESTDOWNLOADVIDEO":
-		var msr *MediaStreamModelRequestDownloadVideoResponse
+		var msr *dto.MediaStreamModelRequestDownloadVideoResponse
 		json.Unmarshal(marshalParam, msr)
 		result.PARAMETER = &msr
 	case "MEDIATASKSTART":
-		var msr *MediaStreamModelMediaTaskStartResponseParameter
+		var msr *dto.MediaStreamModelMediaTaskStartResponseParameter
 		json.Unmarshal(marshalParam, msr)
 		result.PARAMETER = &msr
 	case "MEDIATASKSTOP":
-		var mts *MediaStreamModelMediaTaskStopResponseParameter
+		var mts *dto.MediaStreamModelMediaTaskStopResponseParameter
 		json.Unmarshal(marshalParam, mts)
 		result.PARAMETER = &mts
 	}
@@ -66,7 +67,7 @@ func RequestFile(c interfaces.IChannel, streamName string, streamType int, recor
 		GeneralPackageHeader: GeneralPackageHeader{},
 		MODULE:               "MEDIASTREAMMODEL",
 		OPERATION:            "REQUESTDOWNLOADVIDEO",
-		PARAMETER: MediaStreamModelRequestDownloadVideoParameter{
+		PARAMETER: dto.MediaStreamModelRequestDownloadVideoParameter{
 			PT:         3,
 			SSRC:       128,
 			STREAMNAME: streamName,
@@ -96,7 +97,7 @@ func ControlDownloadVideo(c interfaces.IChannel, streamName string, cmd int) {
 		GeneralPackageHeader: GeneralPackageHeader{},
 		MODULE:               "MEDIASTREAMMODEL",
 		OPERATION:            "CONTROLDOWNLOADVIDEO",
-		PARAMETER: MediaStreamModelControlDownloadVideoParameter{
+		PARAMETER: dto.MediaStreamModelControlDownloadVideoParameter{
 			CSRC:       "",
 			PT:         0,
 			SSRC:       0,
@@ -113,59 +114,4 @@ func ControlDownloadVideo(c interfaces.IChannel, streamName string, cmd int) {
 	bytes := append(headerBytes, marshal...)
 	PrintDebugPackageInfo(bytes)
 	c.SendBytes(bytes)
-}
-
-//"OPERATION": "REQUESTDOWNLOADVIDEO"  ACK
-type MediaStreamModelRequestDownloadVideoResponse struct {
-	ERRORCAUSE   string
-	ERRORCODE    int
-	FILESIZE     int
-	LEFTFILESIZE int
-	SERIAL       int
-	STREAMNAME   string
-}
-
-type MediaStreamModelRequestDownloadVideoParameter struct {
-	PT         int //payload type as in package header
-	SSRC       int
-	STREAMNAME string
-	STREAMTYPE int
-	RECORDID   string
-	CHANNEL    int
-	STARTTIME  string
-	ENDTIME    string
-	OFFSETFLAG int
-	OFFSET     int
-	IPANDPORT  string
-	SERIAL     int
-}
-
-type MediaStreamModelControlDownloadVideoParameter struct {
-	CSRC       string
-	PT         int //payload type as in package header
-	SSRC       int
-	STREAMNAME string
-	//Control the media task operation (0: stop, 1: restore download, 2: pause, 3: switch download mode.
-	//If issue this command, will immediately execute the new command, continue to download until the completion of the download task)
-	CMD int
-	//Download mode, the default is normal download.
-	//If this field does not exist, it is also normal download
-	//0: normal download
-	DT int
-}
-
-//"OPERATION":"MEDIATASKSTART"  ACK (callback)
-type MediaStreamModelMediaTaskStartResponseParameter struct {
-	CSRC       string
-	IPANDPORT  string
-	PT         int //payload type as in package header
-	SSRC       int //128
-	STREAMNAME string
-}
-
-//"OPERATION":"MEDIATASKSTOP"  ACK (callback)
-type MediaStreamModelMediaTaskStopResponseParameter struct {
-	MediaStreamModelMediaTaskStartResponseParameter
-	ERRORCAUSE string
-	ERRORCODE  int
 }

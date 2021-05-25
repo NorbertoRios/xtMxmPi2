@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"streamax-go/dto"
 	"streamax-go/interfaces"
 	"streamax-go/scontext"
 )
@@ -42,7 +43,7 @@ func (d *CertificateModule) handleOperationCreateStream(channel interfaces.IChan
 func (d *CertificateModule) handleOperationConnect(channel interfaces.IChannel) {
 	rawParam := d.PARAMETER.(map[string]interface{})
 	mar, _ := json.Marshal(rawParam)
-	var cp *CertificateParameter
+	var cp *dto.CertificateParameter
 	errM := json.Unmarshal(mar, cp)
 	if errM != nil && cp != nil {
 		d.checkDeviceIdentity(channel, cp.DSNO)
@@ -134,7 +135,7 @@ func certificateConnectCreateValidResponse(session string) CertificateModule {
 		MODULE:    "CERTIFICATE",
 		OPERATION: "CONNECT",
 		SESSION:   session,
-		RESPONSE: &CertificateResponseError{
+		RESPONSE: &dto.CertificateResponseError{
 			ERRORCODE:  0,
 			ERRORCAUSE: "",
 			MASKCMD:    57,
@@ -147,54 +148,9 @@ func certificateCreateStreamResponse(session string) CertificateModule {
 		MODULE:    "CERTIFICATE",
 		OPERATION: "CREATESTREAM",
 		SESSION:   session,
-		RESPONSE: &OperationCreateStreamResponseError{
+		RESPONSE: &dto.OperationCreateStreamResponseError{
 			ERRORCODE:  0,
 			ERRORCAUSE: "",
 		},
 	}
-}
-
-type CertificateResponseError struct {
-	ERRORCODE  int
-	ERRORCAUSE string
-	MASKCMD    int
-}
-
-type CertificateParameter struct {
-	AUTOCAR  string
-	AUTONO   string
-	CARNUM   string
-	CHANNEL  int
-	CID      int
-	CNAME    string
-	CPN      string
-	DEVCLASS int
-	DEVNAME  string
-	DEVTYPE  int
-	DSNO     string
-	EID      string
-	EV       string
-	FSV      int
-	ICCID    string
-	LINENO   string
-	MTYPE    int
-	NET      int
-	PRO      string
-	PV       int
-	STYPE    int
-	TSE      int
-	UNAME    string
-	UNO      string
-}
-
-type OperationCreateStreamParameter struct {
-	DEVTYPE    string
-	DSNO       string
-	STREAMNAME string
-	VISION     string
-}
-
-type OperationCreateStreamResponseError struct {
-	ERRORCODE  int
-	ERRORCAUSE string
 }
