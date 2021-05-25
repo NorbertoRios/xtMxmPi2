@@ -1,9 +1,14 @@
 package service
 
 import (
+	"github.com/nu7hatch/gouuid"
 	"gorm.io/gorm"
+	"strconv"
+	"streamax-go/comm"
+	"streamax-go/dto"
 	"streamax-go/entity"
 	"streamax-go/httpDto"
+	"streamax-go/interfaces"
 	"time"
 )
 
@@ -75,7 +80,41 @@ func QueueSubTasks(st []*entity.SubTasks, task *entity.Tasks, tx *gorm.DB) ([]*e
 			SubTaskId: st[i].ID,
 			TaskId:    task.ID,
 			DeviceId:  task.DeviceId,
+			Status:    "CREATED",
 		})
 	}
 	return q, tx.CreateInBatches(q, len(q)).Error
+}
+
+func SetSubTaskToProgress(st entity.SubTasks, task entity.Tasks, tx *gorm.DB) (*entity.SubTaskQueue, error) {
+	var stq *entity.SubTaskQueue
+	err := tx.First(&stq, "subtask_id = ?", st.ID).Error
+	if err == gorm.ErrRecordNotFound {
+		stq = &entity.SubTaskQueue{
+			SubTaskId: st.ID,
+			TaskId:    task.ID,
+			DeviceId:  task.DeviceId,
+			Status:    "DISPATCHING",
+		}
+	} else {
+		stq.Status = "DISPATCHING"
+	}
+	tx.Save(stq)
+	return stq, err
+}
+
+func ProcessSubTask(st entity.SubTasks, task entity.Tasks, tx *gorm.DB) (*entity.SubTaskQueue, error) {
+	var device entity.Devices
+	tx.First(device, "id = ?", st.DeviceId)
+	channel := comm.DeviceChannelMap[device.Dsno]
+	//dto.RequestFile(*channel, "58895_video", 3,
+	//	"0-0-101", 1, "20210525075506", "20210525081417")
+}
+
+func processStream(c interfaces.IChannel, st entity.SubTasks) {
+	session, _ := uuid.NewV4()
+	dto.OperationQueryFileListRequest(c, session.String(),
+		strconv.FormatInt(st.StartTime.Unix(), 10),
+		strconv.FormatInt(st.EndTime.Unix(), 10),
+		st.Channel)
 }

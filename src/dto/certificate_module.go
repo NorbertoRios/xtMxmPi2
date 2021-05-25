@@ -95,6 +95,8 @@ func (d CertificateModule) checkDeviceSession(c interfaces.IChannel, session str
 			c.SetCurrentSession(session)
 		}
 	}
+	//dd := c.GetDevice()
+	//if comm.DeviceChannelMap[c.GetDevice()]
 }
 
 func GetFirstByDeviceAndResponseType(device *interfaces.Device, rType interface{}) interfaces.Task {

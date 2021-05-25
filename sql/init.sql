@@ -79,6 +79,7 @@ create table subtask_queue
     task_id bigint not null,
     created_time timestamp default CURRENT_TIMESTAMP not null,
     device_id bigint not null,
+    status varchar(25) not null default 'QUEUED',
     constraint subtask_queue_subtask_id_task_id_uindex
         unique (subtask_id, task_id),
     constraint subtask_queue_devices_id_fk
