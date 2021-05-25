@@ -1,12 +1,12 @@
 package tasks
 
 import (
-	"streamax-go/dto"
+	"streamax-go/modules"
 )
 
 type OperationQueryFileListRequestTask struct {
 	GeneralTask
-	Response *dto.QueryFileListResponse
+	Response *modules.QueryFileListResponse
 }
 
 func (r *OperationQueryFileListRequestTask) GetResponse() interface{} {

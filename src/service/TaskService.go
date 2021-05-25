@@ -4,10 +4,10 @@ import (
 	"github.com/nu7hatch/gouuid"
 	"gorm.io/gorm"
 	"strconv"
-	"streamax-go/dto"
 	"streamax-go/entity"
 	"streamax-go/httpDto"
 	"streamax-go/interfaces"
+	"streamax-go/modules"
 	"time"
 )
 
@@ -113,7 +113,7 @@ func ProcessSubTask(st entity.SubTasks, task entity.Tasks, tx *gorm.DB) (*entity
 
 func processStream(c interfaces.IChannel, st entity.SubTasks) {
 	session, _ := uuid.NewV4()
-	dto.OperationQueryFileListRequest(c, session.String(),
+	modules.OperationQueryFileListRequest(c, session.String(),
 		strconv.FormatInt(st.StartTime.Unix(), 10),
 		strconv.FormatInt(st.EndTime.Unix(), 10),
 		st.Channel)

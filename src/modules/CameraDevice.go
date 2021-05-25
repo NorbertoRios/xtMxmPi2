@@ -1,4 +1,4 @@
-package dto
+package modules
 
 type CameraDevice struct {
 	Id string

@@ -1,4 +1,4 @@
-package dto
+package modules
 
 import (
 	"streamax-go/interfaces"

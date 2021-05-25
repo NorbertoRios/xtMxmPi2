@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 	"streamax-go/controller"
-	"streamax-go/dto"
+	"streamax-go/modules"
 	"time"
 )
 
@@ -18,7 +18,7 @@ type Client struct {
 	PageBuffer     *interface{}
 	DSNO           string
 	Session        string
-	VideoHandler   *dto.VideoHandler
+	VideoHandler   *modules.VideoHandler
 }
 
 // Send text message to client
@@ -75,7 +75,7 @@ func (c *Client) RemotePort() int {
 //Listen client data from channel
 func (c *Client) Listen() {
 	buffer := make([]byte, 4096)
-	tso := &dto.TSOBuffer{}
+	tso := &modules.TSOBuffer{}
 	for {
 		count, err := c.Connection.Read(buffer)
 		if err != nil {
@@ -87,9 +87,9 @@ func (c *Client) Listen() {
 		ServerCounters.AddFloat("Received", float64(count))
 		tb := buffer[:count]
 		//justPrint(tb)
-		segmentBuffer := dto.HandlePackageWithSO(tso, tb, c, &dto.GeneralPackageHeader{}, controller.HandleTCPPacket)
+		segmentBuffer := modules.HandlePackageWithSO(tso, tb, c, &modules.GeneralPackageHeader{}, controller.HandleTCPPacket)
 		for segmentBuffer != nil {
-			segmentBuffer = dto.HandlePackageWithSO(tso, segmentBuffer, c, &dto.GeneralPackageHeader{}, controller.HandleTCPPacket)
+			segmentBuffer = modules.HandlePackageWithSO(tso, segmentBuffer, c, &modules.GeneralPackageHeader{}, controller.HandleTCPPacket)
 		}
 	}
 }
@@ -131,7 +131,7 @@ func (c *Client) SetCurrentSession(s string) {
 }
 
 func (c *Client) SetVideoHandler(vh interface{}) {
-	c.VideoHandler = vh.(*dto.VideoHandler)
+	c.VideoHandler = vh.(*modules.VideoHandler)
 }
 func (c *Client) GetVideoHandler() interface{} {
 	return c.VideoHandler

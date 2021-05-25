@@ -2,8 +2,8 @@ package controller
 
 import (
 	"fmt"
-	"streamax-go/dto"
 	"streamax-go/interfaces"
+	"streamax-go/modules"
 	"strings"
 	"sync"
 )
@@ -41,10 +41,10 @@ func ParseModuleName(buffer []byte) string {
 }
 
 func ParseHeaderBitMaskName(buffer []byte) string {
-	if dto.IsBinaryHeartBit(buffer) {
+	if modules.IsBinaryHeartBit(buffer) {
 		return "HEARTBIT"
 	}
-	if dto.IsVideo(buffer) {
+	if modules.IsVideo(buffer) {
 		return "VideoHandler"
 	}
 	return ""
@@ -60,29 +60,29 @@ func justPrint(tb []byte) {
 func InitModuleMap() {
 	if ModuleMap == nil {
 		ModuleMap = make(map[string]*ModuleHandler)
-		var mh ModuleHandler = &dto.CertificateModule{
+		var mh ModuleHandler = &modules.CertificateModule{
 			MODULE: "CERTIFICATE",
 		}
 		ModuleMap["CERTIFICATE"] = &mh
-		var cmmh ModuleHandler = &dto.ConfigModel{
+		var cmmh ModuleHandler = &modules.ConfigModel{
 			MODULE: "CONFIGMODEL",
 		}
 		ModuleMap["CONFIGMODEL"] = &cmmh
 
-		var hbm ModuleHandler = &dto.HeartBit{
+		var hbm ModuleHandler = &modules.HeartBit{
 			MODULE: "HEARTBIT",
 		}
 		ModuleMap["HEARTBIT"] = &hbm
-		var evm ModuleHandler = &dto.Evem{
+		var evm ModuleHandler = &modules.Evem{
 			MODULE: "EVEM",
 		}
 		ModuleMap["EVEM"] = &evm
-		var storm ModuleHandler = &dto.Storm{
+		var storm ModuleHandler = &modules.Storm{
 			MODULE: "STORM",
 		}
 		ModuleMap["STORM"] = &storm
-		var vh ModuleHandler = &dto.VideoHandlerModule{}
+		var vh ModuleHandler = &modules.VideoHandlerModule{}
 		ModuleMap["VideoHandler"] = &vh
 	}
-	dto.DevicesQHolder = new(sync.Map)
+	modules.DevicesQHolder = new(sync.Map)
 }
