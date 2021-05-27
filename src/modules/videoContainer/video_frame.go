@@ -110,7 +110,7 @@ func parseInfoTypeHeader(ex []byte) []*InfoTypeHeader {
 			InfoType:   int(ex[ptr]),
 			InfoLength: int(ex[ptr+3])<<16 + int(ex[ptr+2])<<8 + int(ex[ptr+1]),
 		}
-		head.InfoPayload = ex[ptr+4 : head.InfoLength]
+		head.InfoPayload = ex[ptr+4 : ptr+head.InfoLength]
 		ptr += head.InfoLength
 		headers = append(headers, head)
 	}
