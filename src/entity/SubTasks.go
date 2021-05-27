@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"streamax-go/dto"
 	"streamax-go/httpDto"
 	"time"
 )
@@ -56,4 +57,14 @@ func generateSubTasksFromInt(mask int, dataType string, task *Tasks) []*SubTasks
 		}
 	}
 	return subTasks
+}
+
+func (st SubTasks) GetN9MStreamType() int {
+	switch st.DataType {
+	case dto.STREAM:
+		return 1
+	case dto.SUBSTREAM:
+		return 0
+	}
+	return -1
 }

@@ -1,9 +1,10 @@
-package service
+package httpService
 
 import (
 	"github.com/nu7hatch/gouuid"
 	"gorm.io/gorm"
 	"strconv"
+	"streamax-go/commonService"
 	"streamax-go/entity"
 	"streamax-go/httpDto"
 	"streamax-go/interfaces"
@@ -14,7 +15,7 @@ import (
 func CreateTask(taskDto *httpDto.Task, deviceDsno string, startTime time.Time, endTime time.Time, channels int, stream int, subStream int, screenshot int) (httpDto.TaskResponse, error) {
 	var dev *entity.Devices
 	tx := DB.Begin()
-	defer RecoverTX(tx)
+	defer commonService.RecoverTX(tx)
 	err := tx.First(&dev, "dsno = ?", deviceDsno).Error
 	if err == gorm.ErrRecordNotFound || dev == nil {
 		dev = &entity.Devices{
@@ -88,15 +89,16 @@ func QueueSubTasks(st []*entity.SubTasks, task *entity.Tasks, tx *gorm.DB) ([]*e
 func SetSubTaskToProgress(st entity.SubTasks, task entity.Tasks, tx *gorm.DB) (*entity.SubTaskQueue, error) {
 	var stq *entity.SubTaskQueue
 	err := tx.First(&stq, "subtask_id = ?", st.ID).Error
+
 	if err == gorm.ErrRecordNotFound {
 		stq = &entity.SubTaskQueue{
 			SubTaskId: st.ID,
 			TaskId:    task.ID,
 			DeviceId:  task.DeviceId,
-			Status:    "DISPATCHING",
+			Status:    commonService.Dispatching,
 		}
 	} else {
-		stq.Status = "DISPATCHING"
+		stq.Status = commonService.Dispatching
 	}
 	tx.Save(stq)
 	return stq, err
@@ -117,8 +119,4 @@ func processStream(c interfaces.IChannel, st entity.SubTasks) {
 		strconv.FormatInt(st.StartTime.Unix(), 10),
 		strconv.FormatInt(st.EndTime.Unix(), 10),
 		st.Channel)
-}
-
-func HandleFileListResponse(resp interface{}, c interfaces.IChannel) {
-	//resp.()
 }

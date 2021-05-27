@@ -80,7 +80,7 @@ func (d CertificateModule) ParseDtoFromData(buffer []byte) interface{} {
 func (d CertificateModule) checkDeviceIdentity(channel interfaces.IChannel, deviceId string) {
 	if channel.GetDSNO() == "" {
 		var id interfaces.Device = CameraDevice{Id: deviceId}
-		_, loaded := DevicesQHolder.LoadOrStore(id, QueueHolder{Q: list.New()})
+		_, loaded := DevicesQHolder.LoadOrStore(id, dto.QueueHolder{Q: list.New()})
 		if loaded {
 			channel.SetDSNO(deviceId)
 			//var q = store.(QueueHolder).Q
@@ -109,7 +109,7 @@ func GetFirstByDeviceAndResponseType(device *CameraDevice, rType interface{}) in
 	}
 	value, ok := DevicesQHolder.Load(*device)
 	if ok {
-		var l = value.(QueueHolder).Q
+		var l = value.(dto.QueueHolder).Q
 		front := l.Front()
 		for n := front; n.Value != nil; {
 			task := n.Value.(interfaces.Task)

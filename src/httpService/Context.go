@@ -1,4 +1,4 @@
-package service
+package httpService
 
 import "gorm.io/gorm"
 

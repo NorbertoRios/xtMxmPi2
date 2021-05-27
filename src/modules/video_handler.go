@@ -1,4 +1,4 @@
-package dto
+package modules
 
 import (
 	"crypto/rand"
@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"streamax-go/dto/videoContainer"
 	"streamax-go/interfaces"
+	"streamax-go/modules/videoContainer"
 	"time"
 )
 
@@ -214,7 +214,7 @@ func CreateFileRandomPrefix() string {
 
 func createVideoHandler() *VideoHandler {
 	tNow := time.Now()
-	t := tNow.Format("2006-01-02T15:04:05Z07:00")
+	t := tNow.Format("2006-01-02T15:04:05")
 	prefix := CreateFileRandomPrefix()
 	return &VideoHandler{
 		videoFile:        createFile(t + "_" + prefix + "_part0" + ".video"),

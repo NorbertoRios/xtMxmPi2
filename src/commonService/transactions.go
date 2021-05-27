@@ -1,4 +1,4 @@
-package service
+package commonService
 
 import (
 	"fmt"
@@ -10,4 +10,10 @@ func RecoverTX(tx *gorm.DB) {
 		tx.Rollback()
 		fmt.Println(r)
 	}
+}
+
+func NewTx(tx *gorm.DB) *gorm.DB {
+	newTx := tx.Begin()
+	RecoverTX(newTx)
+	return newTx
 }

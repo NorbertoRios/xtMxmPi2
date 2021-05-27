@@ -1,4 +1,4 @@
-package modules
+package dto
 
 import (
 	"container/list"

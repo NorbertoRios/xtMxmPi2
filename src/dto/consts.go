@@ -24,3 +24,8 @@ const (
 	Hebrew
 	ChineseTraditional
 )
+const SUB_STREAM_N9M = 0
+const MAIN_STREAM_N9M = 1
+const SUBSTREAM = "substream"
+const STREAM = "stream"
+const SCREENSHOT = "screenshot"

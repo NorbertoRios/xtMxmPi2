@@ -65,3 +65,26 @@ type QueryFileListResponse struct {
 	STAMPID       []int    //creation order count, not unique
 	STREAMTYPE    []int    //no docs
 }
+
+func (r QueryFileListResponse) SplitToRecordFilesDTO() []*RecordFileDTO {
+	size := len(r.AT)
+	res := make([]*RecordFileDTO, size)
+	for i := 0; i < size; i++ {
+		res[i].AT = r.AT[i]
+		res[i].ERRORCAUSE = r.ERRORCAUSE
+		res[i].ERRORCODE = r.ERRORCODE
+		res[i].FILETYPE = r.FILETYPE[i]
+		res[i].LASTRECORD = r.LASTRECORD
+		res[i].LOCK = r.LOCK[i]
+		res[i].RECORD = r.RECORD[i]
+		res[i].RECORDCHANNEL = r.RECORDCHANNEL[i]
+		res[i].RECORDID = r.RECORDID[i]
+		res[i].RECORDSIZE = int64(r.RECORDSIZE[i])
+		res[i].SENDFILECOUNT = r.SENDFILECOUNT
+		res[i].SENDTIME = r.SENDTIME
+		res[i].SERIAL = int(r.SERIAL)
+		res[i].STAMPID = r.STAMPID[i]
+		res[i].STREAMTYPE = r.STREAMTYPE[i]
+	}
+	return res
+}

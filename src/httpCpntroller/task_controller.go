@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"streamax-go/httpDto"
-	"streamax-go/service"
+	"streamax-go/httpService"
 	"time"
 )
 
@@ -29,7 +29,7 @@ func (h HttpTaskController) CreateTaskPOST(c *gin.Context) {
 	streamBits := task.GetTypeFromTask("stream")
 	substreamBits := task.GetTypeFromTask("substream")
 	screenshotBits := task.GetTypeFromTask("screenshot")
-	taskResponse, tErr := service.CreateTask(
+	taskResponse, tErr := httpService.CreateTask(
 		&task,
 		task.Dsno,
 		time.Unix(task.StartTime, 0).UTC(),

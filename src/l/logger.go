@@ -1,4 +1,4 @@
-package logger
+package l
 
 import (
 	"fmt"
@@ -90,4 +90,14 @@ func (l *logger) WriteToLog(logType string, content ...interface{}) {
 		}
 	}
 	log.Print(fmt.Sprintf("[%v]", logType), logContent)
+}
+
+func Inf(content ...interface{}) {
+	Logger().WriteToLog(Info, content)
+}
+func Err(content ...interface{}) {
+	Logger().WriteToLog(Error, content)
+}
+func Fat(content ...interface{}) {
+	Logger().WriteToLog(Fatal, content)
 }

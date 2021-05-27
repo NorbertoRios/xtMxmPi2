@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"streamax-go/dto"
 	"streamax-go/interfaces"
+	"streamax-go/tcpService"
 )
 
 type Storm struct {
@@ -65,7 +66,7 @@ func (s Storm) OperationQueryFileListResponse(payload []byte, c interfaces.IChan
 	var res *dto.QueryFileListResponse
 	err := json.Unmarshal(payload, &res)
 	if err == nil && res != nil {
-		//service.HandleFileListResponse(res, c)
+		tcpService.HandleFileListResponse(res, c)
 	}
 }
 
