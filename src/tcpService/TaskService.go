@@ -24,8 +24,8 @@ func HandleFileListResponse(res *dto.QueryFileListResponse, c interfaces.IChanne
 	} else if err != nil {
 		l.Err("error in tx found for DSNO " + strconv.FormatInt(dsno, 10))
 	}
-	records := res.SplitToRecordFilesDTO()
-	filtered := FilterRecordsByTaskConditions(stq, records)
+	//records := res.SplitToRecordFilesDTO()
+	//filtered := FilterRecordsByTaskConditions(stq, records)
 
 	//tx.First()
 }

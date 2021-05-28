@@ -93,3 +93,30 @@ create table subtask_queue
 alter table posi.subtask_queue
     add primary key (subtask_id, task_id);
 
+create table posi.record_files
+(
+    id bigint not null,
+    subtask_id bigint null,
+    channel int not null,
+    data_type varchar(20) not null,
+    status varchar(20) default 'QUERIED' null,
+    device_id bigint not null,
+    at int null,
+    record_size int null,
+    stamp_id int null,
+    cmd int not null,
+    record_id varchar(20) null,
+    created_time timestamp default CURRENT_TIMESTAMP not null,
+    updated_time timestamp default CURRENT_TIMESTAMP not null,
+    deleted_time timestamp null,
+    constraint record_files_id_uindex
+        unique (id),
+    constraint record_files_devices_id_fk
+        foreign key (device_id) references posi.devices (id),
+    constraint record_files_sub_tasks_id_fk
+        foreign key (subtask_id) references posi.sub_tasks (id)
+);
+
+alter table posi.record_files
+    add primary key (id);
+
